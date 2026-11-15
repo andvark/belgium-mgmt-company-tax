@@ -62,6 +62,27 @@ nsc = len(scenario_list())
 tp = paths[(paths.profit_level == 100e3) & (paths.concentration == 1.0) & (paths.hire_cost == 0)]
 
 
+POP = ROOT / "outputs" / "population"
+mc = pd.read_csv(POP / "static_revenue_mc.csv")
+dyn = pd.read_csv(POP / "dynamic_grid_central.csv")
+strict = pd.read_csv(POP / "strict_bound.csv")
+wb = pd.read_csv(POP / "wealth_bound.csv")
+ban = pd.read_csv(POP / "ban_bound_budget.csv")
+beq = pd.read_csv(POP / "breakeven_mc.csv")
+psum = json.load(open(POP / "population_summary.json"))
+st_c = strict[(strict.scenario == "Combined central") & (~strict.adapt)].iloc[0, 2]
+w_m = wb[wb.case.str.startswith("Combined")]
+w_b = wb[wb.case.str.startswith("NO")]
+
+
+def mcv(scn, per, col, adapt=False):
+    return mc[(mc.scenario == scn) & (mc.period == per) & (mc.adapt == adapt)][col].iloc[0]
+
+
+def dv(scn, adapt, eps, sv, phi, col):
+    return dyn[(dyn.scenario == scn) & (dyn.adapt == adapt) & (dyn.eps_employee_share == eps) & (dyn.s_per_pp == sv) & (dyn.phi_stop == phi)][col].iloc[0]
+
+
 def dtax(arch, years, sc=COMB):
     b0 = tp[(tp.scenario == "baseline") & (tp.arrangement == arch)].set_index("year").tax_total_mean
     d = tp[(tp.scenario == sc) & (tp.arrangement == arch)].set_index("year").tax_total_mean - b0
@@ -77,8 +98,8 @@ L.append("# Will the Belgian draft on management companies reduce entrepreneurs,
 L.append("**A modelling report on one-person companies (BV/SRL): motivation, method, data and results (15 November 2026).**\n")
 L.append("> **How to read this report.** Everything below is a *model* result. (1) The tax rules were supplied by the project owner with official citations but **could not be confirmed against the primary pages** (anti-bot blocks and a 404), "
          "so every figure is conditional on them; the values to check by hand are in [`hand_check_list.md`](hand_check_list.md). (2) The draft text was not available: P2 (payroll multiple 2x/3x) and P3 (client threshold, lookback) come from second-hand excerpts "
-         "and are run as **scenario assumptions**, never as 'the proposal'. (3) **No estimate of the number of entrepreneurs, of the wealth distribution or of the budget is made here**; those need a population model and data that are not yet available (section 7). "
-         "(4) Nothing here is a forecast of what owners will do.\n")
+         "and are run as **scenario assumptions**, never as 'the proposal'. (3) The population-level results (section 5.4) are **bounds and sweeps**, not estimates: the mix of owner types in S0, its size, and how owners respond are assumptions that no data identify, so every such result is conditional on them. "
+         "(4) Nothing here is a forecast of what owners will do. Every hypothesis and its verdict is in [`hypotheses.md`](hypotheses.md).\n")
 
 # ------------------------------------------------------------------------------------------------------------------ summary
 L.append("## 1. Summary\n")
@@ -94,7 +115,9 @@ L.append(f"- **What the model shows under current law.** A one-person company ow
          f"All three together leave a one-client owner at EUR 100,000 with EUR {eur(e(COMB, 1.0, 100000, 'adv_scn') / N)} a year of advantage instead of EUR {eur(e(COMB, 1.0, 100000, 'adv0') / N)}.\n"
          f"- **Timing matters for the budget.** For owners who keep profit in the liquidation reserve, P2 and P3 *reduce* tax revenue in 2028-2039 (the 10% levy is no longer paid) and raise it only when the company is wound up; for owners who pay dividends every year they raise revenue at once. "
          "The sign of the early-year effect therefore depends on the mix of owner types, which no public data pin down.\n"
-         "- **What cannot be said yet.** Whether the number of entrepreneurs falls, how wealth is redistributed, and whether EUR 300m (2027) and EUR 450m a year (2028-29) is plausible. Section 7 says what is needed.\n")
+         f"- **Population level (conditional on assumed owner mixes).** The number of company owners falls: {100 * st_c:.1f}% of S0 would leave if every owner optimised strictly (only those whose advantage turns negative), and {abs(dv('Combined central', True, 0.5, 0.02, 0.0, 'bv_owners_2040_pct')):.0f}% by 2040 under a response of 2% per percentage point of lost advantage (an assumption); the number of entrepreneurs including sole traders falls only if leavers become employees or stop. "
+         f"Static revenue from all three measures in 2028-29 has a median of EUR {mcv('Combined central', '2028-29', 'median'):,.0f}m over 4,000 random owner mixes and is negative in {pct(mcv('Combined central', '2028-29', 'share_negative'))} of them; {pct(mcv('Combined central', '2028-29', 'share_ge_450'))} of mixes reach EUR 450m, and {pct(mcv('P1 (2027)', '2027', 'share_ge_300'))} reach EUR 300m in 2027 from P1 alone. "
+         f"Owners who switch to a sole trader or employee job *raise* revenue; the gain is cancelled only if roughly a third of leavers stop working. The national wealth Gini moves by at most {w_m.delta_gini.abs().max():.3f} for the measures and {w_b.delta_gini.abs().max():.3f} for abolishing management companies altogether.\n")
 L.append("![Headline](figures/01_headline.png)\n")
 
 # ------------------------------------------------------------------------------------------------------------------ motivation
@@ -146,6 +169,16 @@ L.append("65 automated tests: hand-computed worked examples for every tax functi
          "a proposal can only hurt a fixed strategy, tighter parameters hurt more, the employee and sole trader are untouched, a no-change policy path equals the baseline, a company that pays out all profit equals a sole trader with the same costs). "
          "These tests check the code against the *supplied* rules; no official published example was available, so they do not confirm the rules. The pruned and parallelised comparison B reproduces the earlier full grid exactly (12,120 shared rows, maximum difference 0).\n")
 
+L.append("### 3.6 Population layer (comparison C): what is assumed\n")
+L.append("Per-owner results (above) are combined into a population of S0 owners. **Nothing in this layer is estimated from data.** The inputs are swept: "
+         "(a) the **size of S0**: 351,000 zero-employee BV/SRL SMEs (supplied; the 73.7% share is unverified), varied from 200,000 to 450,000; "
+         "(b) the **owner mix**: revenue (lognormal, median EUR 45-150k), payout strategy (eight types, random shares), client concentration (share with exactly one client 0-100%), independent of each other, in 4,000 random draws plus an illustrative central mix; "
+         "(c) **entry and exit**: the number of owners of a type falls to exp(-s x loss) of today's, where loss is the fall of the owner's advantage over a sole trader in percentage points of revenue, adjusted with a three-year lag; s = 1-10% per point (s = 2% is anchored on a UK finding that 10% more tax savings raise the incorporation hazard by 2.3%, "
+         "a figure seen only in a search snippet and not verified); a strict bound counts only owners whose advantage turns from non-negative to negative; "
+         "(d) **where leavers go**: a share who stop all activity (their tax is lost), the rest employee or sole trader; "
+         "(e) the **national wealth distribution**: rebuilt from observed HFCS 2023 aggregates (deciles, mean, Gini 0.604; the rebuilt Gini is 0.596), 5.2 million households (derived in the earlier model), S0 owners placed at assumed percentiles of that distribution. "
+         "Households are a single owner unless stated. Owners are either assumed to keep their planning or to re-plan after the measures.\n")
+
 # ------------------------------------------------------------------------------------------------------------------ data
 L.append("## 4. Data taken\n")
 L.append("No new web data were collected for these runs; inputs are the owner's supplied rules, official statistics found in earlier sessions, and stylised assumptions. Full registry: `data/sources.yaml`, `docs/rules_inputs.md`, `docs/evidence_found.md`.\n")
@@ -158,6 +191,7 @@ L.append("| input | value / use | source | status |\n|---|---|---|---|\n"
          "| BV/SRL, all sizes, 2024 | 477,126 (context) | Statbel BeStat | checked |\n"
          "| BV/SRL SMEs and share without employees | 476,914 and 73.7%, i.e. about 351,000 (context and plausibility arithmetic) | FPS Economy via project owner | supplied, share unverified |\n"
          "| Zero-employee enterprises, births, deaths (2024) | 729,925; 67,369; 50,325 (context) | Eurostat | checked (different definition) |\n"
+         "| Net wealth of Belgian households (median, mean, deciles, Gini, top shares) and household count | EUR 254,200 median; EUR 411,500 mean; Gini 0.604; about 5.2 million households | ECB HFCS wave 2023 (observed, in `data/`); household count derived in the earlier model from published composition data | observed / derived |\n"
          "| Shock sizes, running costs, paid-up capital | wage shock sd 0.08 / persistence 0.9; business shock sd 0.25 / 0.6; EUR 1,000 and 4,000 a year; EUR 12,000 | stylised assumptions of the earlier `belgium_abm` model | assumed |\n"
          "| Household spending needs, partner income | EUR 24,000 + 12,000 partner + 6,000 per child; partner nets EUR 30,000 | placeholders | assumed |\n"
          "| Client concentration of owners | mean largest-client share 50-100% with assumed fluctuation | none exists | **not data** |\n"
@@ -217,11 +251,40 @@ L.append(f"Per owner and year, under all three measures with static behaviour at
          "The real population is a mixture of owner types that is not known, so this is a scale check, not a validation of the draft's figure.\n")
 
 # ------------------------------------------------------------------------------------------------------------------ answers
+L.append("### 5.4 Population-level tests (conditional on assumed owner mixes)\n")
+L.append("Everything in this subsection rests on the assumptions listed in 3.6; the figures show ranges over those assumptions, not estimates. The full list of 18 hypotheses with tests, evidence and verdicts is in [`hypotheses.md`](hypotheses.md).\n")
+L.append("**Number of owners and entrepreneurs.** "
+         f"If every owner optimised strictly, so that only owners whose advantage actually turns negative leave (a bound that needs no elasticity but assumes perfect optimisation), {100 * st_c:.1f}% of S0 would leave under all three measures (about {round(st_c * 351000, -3):,.0f} of 351,000); P2 alone makes nobody leave and P1 or P3 alone about 1.7%. "
+         f"With a smooth response the number of company owners falls by {abs(dv('Combined central', True, 0.5, 0.02, 0.0, 'bv_owners_2040_pct')):.1f}% by 2040 at s = 2% and {abs(dv('Combined central', True, 0.5, 0.10, 0.0, 'bv_owners_2040_pct')):.1f}% at s = 10%. "
+         f"The count of *entrepreneurs*, which includes sole traders, falls about half as much when half of the leavers become employees ({abs(dv('Combined central', True, 0.5, 0.02, 0.0, 'self_employed_2040_pct')):.1f}% at s = 2%), and not at all if every leaver becomes a sole trader.\n")
+L.append("![Entrepreneur counts](figures/10_entrepreneur_counts.png)\n")
+drv = pd.read_csv(POP / "static_revenue_drivers.csv").set_index("driver").spearman_with_2028_29_revenue
+L.append("**Budget across owner mixes.** "
+         f"Over 4,000 random mixes the static revenue of all three measures in 2028-29 has a median of EUR {mcv('Combined central', '2028-29', 'median'):,.0f}m (5th-95th percentile EUR {mcv('Combined central', '2028-29', 'p05'):,.0f}m to {mcv('Combined central', '2028-29', 'p95'):,.0f}m); "
+         f"{pct(mcv('Combined central', '2028-29', 'share_ge_450'))} of mixes reach EUR 450m and {pct(mcv('Combined central', '2028-29', 'share_negative'))} give negative revenue. P1 alone in 2027: median EUR {mcv('P1 (2027)', '2027', 'median'):,.0f}m, {pct(mcv('P1 (2027)', '2027', 'share_ge_300'))} of mixes reach EUR 300m. "
+         f"What drives it (rank correlation with the 2028-29 result): the share of owners on the liquidation-reserve routes ({drv['share_reserve_routes']:+.2f}) and of optimisers ({drv['share_OPT']:+.2f}) lower it, the share paying EUR 51k with dividends raises it ({drv['share_pay51_dividend_or_ordinary']:+.2f}); revenue level ({drv['median_revenue']:+.2f}) and the size of S0 ({drv['N0']:+.2f}) matter less; the share with one client hardly at all ({drv['share_S1']:+.2f}). "
+         "The 'central' mix used in the other figures is illustrative, chosen by me, and is not evidence: that it gives about EUR 450m is a coincidence of the assumption.\n")
+L.append("![Budget range](figures/08_budget_range_across_mixes.png)\n")
+L.append("![Tornado](figures/11_tornado.png)\n")
+nonrow = beq.drop_duplicates("draw")
+L.append("**Do behavioural responses cancel the gain?** "
+         f"Leavers who become sole traders or employees *raise* revenue, because they pay more than company owners do (EUR {dv('Combined central', True, 0.5, 0.02, 0.0, 'revenue_2028_29_EURm'):,.0f}m against EUR {dv('Combined central', True, 0.5, 0.0, 0.0, 'revenue_2028_29_EURm'):,.0f}m static at s = 2%). "
+         f"The response cancels the gain only if about 37% of leavers stop working altogether, and takes revenue to zero at 46-74% at the central mix. Put differently, EUR 450m of revenue is wiped out if about {psum['owners_to_stop_to_remove_450m']:,.0f} owners ({100 * psum['share_of_S0_to_stop_to_remove_450m']:.1f}% of S0) stop all activity at the central mix (median {nonrow.owners_who_must_stop_to_cancel_static.median():,.0f} across random mixes). "
+         "Stopping, emigrating or cutting activity is what matters for this hypothesis, not switching legal form; none of these can be calibrated from the data found.\n")
+L.append("![Break-even](figures/09_breakeven.png)\n")
+L.append("**Wealth distribution.** "
+         f"The measures cost the average owner about EUR {round(w_m.mean_loss.mean(), -3) / 1000:.0f}k of 15-year accumulated wealth ({100 * w_m.loss_share_of_total_wealth.mean():.1f}% of national net wealth in total), but the national Gini (rebuilt from observed HFCS aggregates, 0.596 against 0.604) moves by only {w_m.delta_gini.min():+.4f} to {w_m.delta_gini.max():+.4f}; "
+         f"the bounding case in which every owner becomes a sole trader or employee moves it by {w_b.delta_gini.min():+.4f} to {w_b.delta_gini.max():+.4f}. The sign depends on where owner-manager households sit in the national distribution (an assumption): taking wealth from households below the mean raises measured inequality and taking it from households above the mean lowers it. "
+         f"As a budget ceiling, abolishing management companies would add EUR {ban[ban.household == 'single'].extra_tax_and_contributions_2028_29_EURm.min() / 1000:.1f}-{ban[ban.household == 'single'].extra_tax_and_contributions_2028_29_EURm.max() / 1000:.1f}bn a year in 2028-29, about {pct(dv('Combined central', True, 0.5, 0.0, 0.0, 'static_2028_29_EURm') / ban[(ban.household == 'single') & (ban.leavers_employee_share == 0.5)].extra_tax_and_contributions_2028_29_EURm.iloc[0])} of which the combined measures capture. "
+         "National top-wealth results are bounds only (closely held large companies and holdings are not in the model).\n")
+hy = [ln for ln in open(ROOT / "docs" / "hypotheses.md", encoding="utf-8") if ln.startswith("| H")]
+L.append("**Verdicts at a glance** (details in `hypotheses.md`):\n\n| # | hypothesis | verdict |\n|---|---|---|\n" + "\n".join("| " + " | ".join(c.strip() for c in (ln.split("|")[1], ln.split("|")[2], ln.split("|")[5])) + " |" for ln in hy) + "\n")
+
 L.append("## 6. What this means for the three questions\n")
-L.append("| question | what the model supports | what it does not support |\n|---|---|---|\n"
-         "| Fewer entrepreneurs? | Under current law the company beats a sole trader only above about EUR 43k of revenue and gains most at high revenue; the measures cut that gain by roughly half for a one-client owner and raise the break-even revenue to about EUR 51k. Whether anyone leaves depends on how responsive the choice of arrangement is. | A count. No Belgian elasticity exists in what was found; the number can only be given as a function of an assumed sensitivity, with the break-even sensitivity (planned). |\n"
-         "| Wealth distribution? | For owner-manager households the measures lower the tax-sheltered wealth they can build (the loss columns). | A national distribution result: needs the population model and the bounding 'no management companies' scenario; the national tail is not identified by public data. |\n"
-         "| Budget? | Mechanically, who pays more and when (5.3), including that some owner types pay *less* early on. | Whether EUR 300m / 450m is reached: needs the number of owners of each type, which is unknown, and behavioural responses. |\n")
+L.append("| question | what the model supports (conditional) | what it cannot say |\n|---|---|---|\n"
+         f"| Fewer entrepreneurs? | If every owner optimised strictly, {100 * st_c:.1f}% of S0 would leave (those whose advantage turns negative); a smooth response of 2% per percentage point (an assumption, anchored on an unverified UK figure) gives {abs(dv('Combined central', True, 0.5, 0.02, 0.0, 'bv_owners_2040_pct')):.0f}% fewer company owners by 2040; entrepreneurs including sole traders fall only if leavers become employees or stop. | The size: no Belgian estimate of the response exists in what was found; S0 itself is uncertain (351,000 supplied, share unverified). |\n"
+         f"| Wealth distribution? | Owner-manager households end up about EUR {round(w_m.mean_loss.mean(), -3) / 1000:.0f}k poorer on average over 15 years; the national Gini moves by less than {w_m.delta_gini.abs().max():.3f} (bound for abolition: {w_b.delta_gini.abs().max():.3f}). | The direction (depends on where owners sit nationally) and the top tail. |\n"
+         f"| Budget? | P1 alone brings positive revenue in every mix (median EUR {mcv('P1 (2027)', '2027', 'median'):,.0f}m in 2027); all three give a median of EUR {mcv('Combined central', '2028-29', 'median'):,.0f}m in 2028-29 with a wide range ({pct(mcv('Combined central', '2028-29', 'share_ge_450'))} of mixes reach EUR 450m, {pct(mcv('Combined central', '2028-29', 'share_negative'))} are negative); revenue is back-loaded for owners on the reserve route; switching legal form raises revenue, only stopping activity cancels it. | Whether the draft's EUR 300m / 450m is right: that needs the real mix of owners (pay, retained profits, clients), which no public data give. |\n")
 
 # ------------------------------------------------------------------------------------------------------------------ limitations
 L.append("## 7. Limitations and what is needed next\n")
@@ -232,11 +295,12 @@ L.append("- **Rules unconfirmed.** Please confirm the values in [`hand_check_lis
          "- **Not modelled:** entry and exit, relocation, incidence on clients, general equilibrium, a client-diversification response to P3, family tax rules, indexation, the taxes on a hire's wage, pension values.\n"
          "- **Constant 2026 euros, 15-year horizon with liquidation in 2040** (an artefact for late-year effects).\n"
          "- Full list: `limitations.md`.\n")
-L.append("**Next steps** (need the project owner's go-ahead): (1) confirm the hand-check list and supply the draft text; (2) supply or find the open inputs - director pay and retained profits in S0, the share of S0 with one client and with a single director; (3) WP3-4: choice of arrangement with a swept sensitivity, a population of owners, the 'no management companies' bounding case and the break-even sensitivity against EUR 450 million.\n")
+L.append("**What would improve the answers** (the project owner has no additional data, so these are listed, not planned): (1) confirm the hand-check list and supply the draft text; (2) owner-level data on director pay, retained profits, revenue and client concentration in S0 (form 281.20, NBB annual accounts), which would replace the sweeps over the owner mix and make the budget hypotheses testable; "
+         "(3) a Belgian estimate of how owners respond to tax differences, which would replace the swept sensitivity; (4) validation against stock and flow counts of zero-employee companies. Until then the population-level results remain bounds and sweeps.\n")
 
 # ------------------------------------------------------------------------------------------------------------------ sharing
 L.append("## 8. Figures for sharing, with suggested captions\n")
-L.append("All figures are in `docs/figures/` (PNG, 2400 x 1350, 16:9, light background; the values behind each are in `docs/figures/figure_data.csv`). Each image carries its own caveat footer. "
+L.append("All figures (11) are in `docs/figures/` (PNG, 2400 x 1350, 16:9, light background; the values behind each are in `docs/figures/figure_data.csv`). Each image carries its own caveat footer. "
          "**Before posting:** the numbers rest on rules that have not been confirmed against primary sources and on scenario assumptions for the proposals; confirm the hand-check list first, and keep the caveat in the post, because a screenshot travels without this report.\n")
 caps = [
     ("01_headline.png", "Model of Belgian one-person companies (BV): at EUR 100k revenue the best-planned company beats a sole trader by about EUR 13.5k a year today. Under scenarios built from the reported draft, a one-client owner keeps about EUR 6k of that; an owner with several clients is barely touched by the client test. Model result on unconfirmed rules, not a forecast."),
@@ -245,15 +309,19 @@ caps = [
     ("04_advantage_by_exit_route.png", "Why the company wins in the model: the exit rate on profit (10% reserve, 18% VVPRbis) versus 45-50% marginal tax on salary. Holding profit back and taking it later adds nothing at 0% return; the rate gap does."),
     ("05_who_is_hit.png", "Who loses under each measure depends on how the owner pays out profit: P1 only hits owners paying EUR 51k+; P2 hits lump sums; P3 hits one-client owners using VVPRbis or the liquidation reserve. Per-owner loss, same planning, model scenarios."),
     ("06_client_test_cliff.png", "A client-concentration test is a cliff in the model: an owner with exactly one client is always caught; one with 80% from the biggest client mostly is not at a 90% threshold. How many owners sit where is unknown. Scenario assumption, not the draft."),
-    ("07_timing.png", "Same reform, opposite sign for revenue in the first years in the model: owners paying annual dividends pay more at once; owners using the liquidation reserve stop paying its 10% levy and are taxed only at liquidation. The mix of owner types decides the budget profile.")]
+    ("07_timing.png", "Same reform, opposite sign for revenue in the first years in the model: owners paying annual dividends pay more at once; owners using the liquidation reserve stop paying its 10% levy and are taxed only at liquidation. The mix of owner types decides the budget profile."),
+    ("08_budget_range_across_mixes.png", "Over 4,000 random mixes of owner types, the model gives anything from a loss to over EUR 1bn for the draft's extra revenue: the median is ~EUR 164m in 2028-29 against EUR 450m projected, and 25% of mixes reach it. Nobody knows the real mix. Assumption-driven sweep, not an estimate."),
+    ("09_breakeven.png", "In the model, owners who leave a one-person company for a sole-trader or employee job raise tax revenue; the gain is cancelled only if over a third of leavers stop working altogether. Illustrative owner mix; response sizes are assumptions."),
+    ("10_entrepreneur_counts.png", "How many company owners leave depends on an unknown sensitivity (~4% of S0 if every owner optimises strictly, up to ~28% at a high response). Entrepreneurs including sole traders fall only about half as much, and not at all if leavers become sole traders. Assumption-driven."),
+    ("11_tornado.png", "What moves the budget number most in the model: the mix of how owners pay out profit (from -EUR 1bn to +EUR 0.5bn), then median revenue and the size of the group. The proposal parameters matter least. One-at-a-time sweep from an illustrative central mix.")]
 for f, c in caps:
     L.append(f"**{f}** - {c}\n")
 
 # ------------------------------------------------------------------------------------------------------------------ reproduce
 L.append("## 9. Where everything is\n")
-L.append("| file | content |\n|---|---|\n| `docs/report.md` | this report |\n| `docs/comparison_A_results.md`, `docs/comparison_B_results.md` | detailed result tables |\n| `docs/rules_inputs.md`, `docs/hand_check_list.md` | rules, statuses, readings, what to confirm |\n"
+L.append("| file | content |\n|---|---|\n| `docs/report.md` | this report |\n| `docs/comparison_A_results.md`, `docs/comparison_B_results.md` | detailed result tables |\n| `docs/hypotheses.md` | all 18 hypotheses: test, evidence, verdict |\n| `outputs/population/` | per-owner tax paths and the population sweeps |\n| `docs/rules_inputs.md`, `docs/hand_check_list.md` | rules, statuses, readings, what to confirm |\n"
          "| `docs/worked_examples.md`, `docs/implementation_design.md` | hand-computed examples; how the engine is built |\n| `docs/limitations.md`, `docs/data_requirements.md`, `docs/evidence_found.md` | limits, data needs, evidence found |\n"
-         "| `configs/` | policy, assumptions and proposal switches (one entry per rule with status and source) |\n| `outputs/` | all result tables and manifests |\n| `scripts/` | `run_comparison_a.py`, `run_comparison_b.py` (about 2 minutes), `make_report_*.py`, `make_figures.py` |\n")
-L.append("Reproduce: `pip install -e <belgium_abm>; pip install numpy pandas pyyaml pytest matplotlib; pytest; python scripts/run_comparison_a.py; python scripts/run_comparison_b.py; python scripts/make_report_a.py; python scripts/make_report_b.py; python scripts/make_figures.py; python scripts/make_report_main.py`.\n")
+         "| `configs/` | policy, assumptions and proposal switches (one entry per rule with status and source) |\n| `outputs/` | all result tables and manifests |\n| `scripts/` | `run_comparison_a.py`, `run_comparison_b.py` (about 2 minutes), `run_population_inputs.py` (about 70 s), `run_population.py` (about 10 s), `make_report_*.py`, `make_hypotheses.py`, `make_figures.py` |\n")
+L.append("Reproduce: `pip install -e <belgium_abm>; pip install numpy pandas pyyaml pytest matplotlib; pytest; python scripts/run_comparison_a.py; python scripts/run_comparison_b.py; python scripts/run_population_inputs.py; python scripts/run_population.py; python scripts/make_report_a.py; python scripts/make_report_b.py; python scripts/make_hypotheses.py; python scripts/make_figures.py; python scripts/make_report_main.py`.\n")
 (ROOT / "docs" / "report.md").write_text("\n".join(L), encoding="utf-8")
 print("report.md written;", len("\n".join(L).split()), "words")

@@ -330,5 +330,141 @@ ax.text(2027, -5.35, "2040, the liquidation year, is off the chart: +%s and +%s 
 fig.savefig(FIG / "07_timing.png", dpi=200, facecolor=SURF)
 plt.close(fig)
 
+
+# =============================================================================================================================
+# population-level figures (comparison C): every input about the owner mix is an ASSUMPTION that is swept
+# =============================================================================================================================
+POP = ROOT / "outputs" / "population"
+FOOT_POP = ("Model results: tax rules supplied by the project owner and NOT independently confirmed; proposals are scenario assumptions; the owner mix, the size of S0 (351,000 supplied, "
+            "share unverified) and the response of owners are assumptions that are swept, not data. Not a forecast.")
+
+
+def canvas_pop(title, subtitle, wrap=64):
+    global FOOT
+    old = FOOT
+    FOOT = FOOT_POP
+    try:
+        return canvas(title, subtitle, wrap)
+    finally:
+        FOOT = old
+
+
+mc = pd.read_csv(POP / "static_revenue_mc.csv")
+dyn = pd.read_csv(POP / "dynamic_grid_central.csv")
+strict = pd.read_csv(POP / "strict_bound.csv")
+tor = pd.read_csv(POP / "tornado.csv")
+
+# ---- 08: budget range across owner mixes ---------------------------------------------------------------------------------------
+sel = [("P1 alone, 2027", "P1 (2027)", "2027", 300), ("All three, 2028-29", "Combined central", "2028-29", 450), ("All three, 2030-39", "Combined central", "2030-39", None)]
+fig, nl = canvas_pop("Whether the draft raises EUR 300-450m depends on who the owners are, which nobody knows",
+                     "Extra tax and contributions per year with owners keeping their planning, over 4,000 random mixes of revenue, payout strategy, client concentration and size of S0 (200-450k). Dot = median, thick bar = middle half, thin bar = 5th-95th percentile.", wrap=66)
+ax = fig.add_axes([0.25, 0.25, 0.68, 0.30])
+style(ax, grid="x")
+ax.spines["bottom"].set_visible(False)
+ypos = np.arange(len(sel))[::-1]
+for yy, (lab, scn_, per, ref) in zip(ypos, sel, strict=True):
+    r = mc[(mc.scenario == scn_) & (mc.period == per) & (~mc.adapt)].iloc[0]
+    ax.plot([r.p05, r.p95], [yy, yy], color=BLUE, lw=2, alpha=0.45, solid_capstyle="round")
+    ax.plot([r.p25, r.p75], [yy, yy], color=BLUE, lw=8, solid_capstyle="round")
+    dot(ax, r["median"], yy, INK, r=8)
+    ax.text(r.p95 + 25, yy, f"median {r['median']:,.0f}", color=INK, fontsize=10, va="center", fontweight="semibold")
+    for q in ("p05", "p25", "median", "p75", "p95"):
+        record("08_budget_range_across_mixes", lab, q, round(float(r[q]), 1), "EUR million per year")
+    record("08_budget_range_across_mixes", lab, "share of mixes >= projection", round(float(r.share_ge_300 if ref == 300 else (r.share_ge_450 if ref == 450 else np.nan)), 3) if ref else "n/a")
+for xv, lab, ha in ((300, "EUR 300m (2027 projection)  ", "right"), (450, "  EUR 450m (2028-29 projection)", "left")):
+    ax.axvline(xv, color=INK2, lw=1)
+    ax.text(xv, len(sel) - 0.42, lab, color=INK2, fontsize=9, ha=ha, va="bottom")
+ax.axvline(0, color=INK2, lw=1)
+ax.set_yticks(ypos)
+ax.set_yticklabels([x[0] for x in sel], fontsize=10.5, color=INK)
+ax.set_xlim(-700, 1500)
+ax.set_xticks([-500, 0, 500, 1000, 1500])
+ax.set_xticklabels(["-500", "0", "500", "1,000", "EUR 1,500m"])
+r1 = mc[(mc.scenario == "P1 (2027)") & (mc.period == "2027") & (~mc.adapt)].iloc[0]
+r2 = mc[(mc.scenario == "Combined central") & (mc.period == "2028-29") & (~mc.adapt)].iloc[0]
+fig.text(0.05, 0.18, "\n".join(textwrap.wrap(f"Share of mixes reaching the projection: {r1.share_ge_300:.0%} for P1 alone in 2027 (EUR 300m); {r2.share_ge_450:.0%} for all three in 2028-29 (EUR 450m). "
+         f"{r2.share_negative:.0%} of mixes give negative revenue in 2028-29, because owners who keep profit in the liquidation reserve stop paying its 10% levy.", 140)), fontsize=10.5, color=INK2, va="top", linespacing=1.3)
+fig.savefig(FIG / "08_budget_range_across_mixes.png", dpi=200, facecolor=SURF)
+plt.close(fig)
+
+# ---- 09: break-even ------------------------------------------------------------------------------------------------------------------
+cc = dyn[(dyn.scenario == "Combined central") & dyn.adapt & (dyn.eps_employee_share == 0.5)]
+fig, nl = canvas_pop("Leavers who become sole traders or employees add revenue; it takes over a third of leavers stopping work to cancel that",
+                     "Extra revenue 2028-29 at an illustrative central owner mix, by the share of leavers who stop all activity. s = fall in the number of company owners per percentage point of revenue advantage lost. All lines cross the no-response line at about 37%; revenue reaches zero at 46-74%.", wrap=66)
+ax = fig.add_axes([0.07, 0.19, 0.74, 0.38])
+style(ax)
+for sv, c, lab in ((0.0, GRAY, "no response (s = 0)"), (0.02, BLUE, "s = 2% per point"), (0.05, ORANGE, "s = 5% per point"), (0.10, AQUA, "s = 10% per point")):
+    d = cc[cc.s_per_pp == sv].sort_values("phi_stop")
+    ax.plot(d.phi_stop * 100, d.revenue_2028_29_EURm, color=c if sv else MUTED, lw=2, label=lab, solid_capstyle="round")
+    dot(ax, 100, d.revenue_2028_29_EURm.iloc[-1], c if sv else MUTED)
+    ax.text(103, d.revenue_2028_29_EURm.iloc[-1], f"{d.revenue_2028_29_EURm.iloc[-1]:,.0f}", color=INK, fontsize=10, va="center", fontweight="semibold")
+    for xx, yy in zip(d.phi_stop * 100, d.revenue_2028_29_EURm, strict=True):
+        record("09_breakeven", lab, xx, round(yy, 1), "EUR million, 2028-29")
+ax.axhline(0, color=INK2, lw=1)
+ax.set_xlim(0, 100)
+ax.set_xticks([0, 25, 50, 75, 100])
+ax.set_xticklabels(["0%", "25%", "50%", "75%", "100% of leavers stop"])
+ax.set_ylabel("EUR million per year, 2028-29", color=INK2, fontsize=10.5)
+ax.set_yticks([-2000, -1000, 0, 1000, 2000])
+ax.set_yticklabels(["-2,000", "-1,000", "0", "1,000", "2,000"])
+ax.legend(loc="lower left", frameon=False, fontsize=10, labelcolor=INK2)
+fig.savefig(FIG / "09_breakeven.png", dpi=200, facecolor=SURF)
+plt.close(fig)
+
+# ---- 10: entrepreneurs / owners --------------------------------------------------------------------------------------------------------
+cc = dyn[(dyn.scenario == "Combined central") & dyn.adapt & (dyn.eps_employee_share == 0.5) & (dyn.phi_stop == 0.0)].set_index("s_per_pp")
+st = strict[(strict.scenario == "Combined central") & (~strict.adapt)].iloc[0].iloc[2] * 100
+cats = [("Perfect optimiser\n(only owners whose advantage turns negative)", -st, -st * 0.5)] + [(f"s = {int(round(sv * 100))}%\nper point", cc.loc[sv, "bv_owners_2040_pct"], cc.loc[sv, "self_employed_2040_pct"]) for sv in (0.01, 0.02, 0.05, 0.10)]
+fig, nl = canvas_pop("Fewer company owners, but fewer entrepreneurs only if leavers become employees",
+                     "Change by 2040 versus today, central owner mix, half of leavers become employees and half sole traders. Company owners (BV) and all self-employed including sole traders.", wrap=66)
+ax = fig.add_axes([0.07, 0.19, 0.86, 0.38])
+style(ax)
+w = 0.34
+xs = np.arange(len(cats))
+for j, (lab, c) in enumerate((("Company owners (BV)", BLUE), ("All entrepreneurs (company owners + sole traders)", ORANGE))):
+    vals = [x[1 + j] for x in cats]
+    ax.bar(xs + (j - 0.5) * (w + 0.02), vals, width=w, color=c, label=lab, zorder=3)
+    for xx, v in zip(xs + (j - 0.5) * (w + 0.02), vals, strict=True):
+        ax.text(xx, v - 0.8, f"{v:.1f}%", ha="center", va="top", fontsize=10, fontweight="semibold", color=INK)
+    for (cl, *_), v in zip(cats, vals, strict=True):
+        record("10_entrepreneur_counts", f"{lab} | {cl.replace(chr(10), ' ')}", "2040 change %", round(float(v), 2))
+ax.axhline(0, color=INK2, lw=1)
+ax.set_xticks(xs)
+ax.set_xticklabels([x[0] for x in cats], fontsize=10, color=INK2)
+ax.set_ylim(-34, 3)
+ax.set_yticks([-30, -20, -10, 0])
+ax.set_yticklabels(["-30%", "-20%", "-10%", "0"])
+ax.legend(loc="lower left", frameon=False, fontsize=10, labelcolor=INK2)
+fig.savefig(FIG / "10_entrepreneur_counts.png", dpi=200, facecolor=SURF)
+plt.close(fig)
+
+# ---- 11: tornado -----------------------------------------------------------------------------------------------------------------------
+t = tor[tor.factor != "central mix"].copy()
+t["lo"], t["hi"] = t[["low", "high"]].min(axis=1), t[["low", "high"]].max(axis=1)
+t = t.assign(width=t.hi - t.lo).sort_values("width")
+centre = float(tor[tor.factor == "central mix"].low.iloc[0])
+fig, nl = canvas_pop("The strategy mix of owners moves the budget more than any proposal parameter",
+                     f"Extra revenue 2028-29, all three measures, owners keeping their planning, changing one assumption at a time from an illustrative central mix (EUR {centre:,.0f}m). Bars span the two values tried.", wrap=66)
+ax = fig.add_axes([0.35, 0.17, 0.58, 0.42])
+style(ax, grid="x")
+ax.spines["bottom"].set_visible(False)
+nice = {"median revenue": "median revenue (60k vs 130k)", "revenue spread (sigma)": "revenue spread (0.3 vs 0.9)", "share with one client (S1)": "share with one client (10% vs 80%)", "size of S0 (N0)": "size of S0 (250k vs 450k)",
+        "strategy mix": "payout strategy (all ordinary vs all optimisers)", "household": "household (single vs one earner + 2 children)", "owners re-plan": "owners re-plan after the measures",
+        "measure parameters": "measure parameters (mild vs harsh)"}
+for yy, (_, r) in enumerate(t.iterrows()):
+    ax.plot([r.lo, r.hi], [yy, yy], color=BLUE, lw=8, solid_capstyle="round")
+    ax.text(r.hi + 30, yy, f"{r.lo:,.0f} to {r.hi:,.0f}", fontsize=9.5, color=INK, va="center")
+    record("11_tornado", r.factor, "low / high EUR m", f"{r.low:.0f} / {r.high:.0f}")
+ax.axvline(centre, color=INK2, lw=1)
+ax.axvline(450, color=MUTED, lw=1)
+ax.text(450, len(t) - 0.4, "EUR 450m", color=MUTED, fontsize=9, ha="center", va="bottom")
+ax.set_yticks(range(len(t)))
+ax.set_yticklabels([nice.get(f, f) for f in t.factor], fontsize=9.8, color=INK)
+ax.set_xlim(-1250, 1650)
+ax.set_xticks([-1000, -500, 0, 500, 1000, 1500])
+ax.set_xticklabels(["-1,000", "-500", "0", "500", "1,000", "EUR 1,500m"])
+fig.savefig(FIG / "11_tornado.png", dpi=200, facecolor=SURF)
+plt.close(fig)
+
 pd.DataFrame(data_rows).to_csv(FIG / "figure_data.csv", index=False, lineterminator="\n")
 print("figures written:", sorted(p.name for p in FIG.glob("*.png")))

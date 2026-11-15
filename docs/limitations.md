@@ -53,6 +53,15 @@ Stated up front so that no result is read as more than it is.
 35. **Timing.** Static revenue effects of P2 and P3 can be negative in the early years for owners on the liquidation-reserve route and positive later; comparing with the government's EUR 300m / 450m profile requires the owner mix and a population model.
 36. **A hire is treated as a cost that leaves the system**; the taxes and contributions on the hire's wage are not counted, which understates revenue under P1 for owners who hire.
 
+## Added with the population layer (15 November 2026)
+
+37. **The owner mix is assumed.** Revenue, payout strategy and client concentration of S0 owners, and the size of S0, are swept, never estimated; the three dimensions are assumed independent; the 'central' mix is illustrative and not evidence.
+38. **The response of owners is assumed.** The sensitivity s (2% per percentage point is anchored on an unverified UK figure from a search snippet), the three-year adjustment, the destination of leavers and the share who stop activity are swept; the 'strict' bound assumes perfect optimisation and is not a floor on the real response.
+39. **Entry is modelled only through the stock of owners.** No explicit entry of new companies, no change of client behaviour, no replacement of leavers' output by others (incidence), no relocation.
+40. **The wealth bound is a steady-state comparison.** The national distribution is rebuilt from observed HFCS deciles and a Pareto tail (Gini 0.596 vs 0.604), owner households are placed at assumed percentiles, and the 15-year accumulated loss is subtracted; the sign of the Gini change depends on the placement.
+41. **Hire responses are ignored at population level** (the micro results show they are rarely chosen) and the taxes on a hire's wage are not counted.
+42. **Per-owner tax paths use fixed 2026 euros and a 15-year horizon with liquidation in 2040**; late-year (2040) figures are an artefact and are not used in the budget comparisons with the government's projections.
+
 ## What the study can credibly claim
 
 - the size and structure of the current tax advantage by profit level and household type under the verified rules;

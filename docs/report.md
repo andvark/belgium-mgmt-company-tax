@@ -2,7 +2,7 @@
 
 **A modelling report on one-person companies (BV/SRL): motivation, method, data and results (15 November 2026).**
 
-> **How to read this report.** Everything below is a *model* result. (1) The tax rules were supplied by the project owner with official citations but **could not be confirmed against the primary pages** (anti-bot blocks and a 404), so every figure is conditional on them; the values to check by hand are in [`hand_check_list.md`](hand_check_list.md). (2) The draft text was not available: P2 (payroll multiple 2x/3x) and P3 (client threshold, lookback) come from second-hand excerpts and are run as **scenario assumptions**, never as 'the proposal'. (3) **No estimate of the number of entrepreneurs, of the wealth distribution or of the budget is made here**; those need a population model and data that are not yet available (section 7). (4) Nothing here is a forecast of what owners will do.
+> **How to read this report.** Everything below is a *model* result. (1) The tax rules were supplied by the project owner with official citations but **could not be confirmed against the primary pages** (anti-bot blocks and a 404), so every figure is conditional on them; the values to check by hand are in [`hand_check_list.md`](hand_check_list.md). (2) The draft text was not available: P2 (payroll multiple 2x/3x) and P3 (client threshold, lookback) come from second-hand excerpts and are run as **scenario assumptions**, never as 'the proposal'. (3) The population-level results (section 5.4) are **bounds and sweeps**, not estimates: the mix of owner types in S0, its size, and how owners respond are assumptions that no data identify, so every such result is conditional on them. (4) Nothing here is a forecast of what owners will do. Every hypothesis and its verdict is in [`hypotheses.md`](hypotheses.md).
 
 ## 1. Summary
 
@@ -10,7 +10,7 @@
 - **Where the advantage comes from.** Mostly from the gap between the exit rate on profits taken out of the company (10% liquidation reserve, 18% VVPRbis, 30% ordinary) and the 45-50% marginal rate on salary. With a 0% return on retained money, holding profit back and taking it out after 3-5 years gives *exactly the same* result as paying the 18% dividend every year: the hypothesis that the benefit is deferral is not what the rules produce; the rate gap is.
 - **What the three measures do (scenarios).** *P1* (20% rate needs an employee) only affects owners who pay themselves at least EUR 51,000; hiring is almost never worth it. *P2* (payroll cap) hits lump-sum extraction hardest. *P3* (client test) removes about **53% of the advantage of an owner with a single client** at EUR 100,000 revenue whatever the threshold or lookback, because such an owner is always caught; for owners with several clients the outcome depends on the threshold and is small at a 90% threshold (1% removed for an owner with 80% of revenue from the biggest client). All three together leave a one-client owner at EUR 100,000 with EUR 6,101 a year of advantage instead of EUR 13,509.
 - **Timing matters for the budget.** For owners who keep profit in the liquidation reserve, P2 and P3 *reduce* tax revenue in 2028-2039 (the 10% levy is no longer paid) and raise it only when the company is wound up; for owners who pay dividends every year they raise revenue at once. The sign of the early-year effect therefore depends on the mix of owner types, which no public data pin down.
-- **What cannot be said yet.** Whether the number of entrepreneurs falls, how wealth is redistributed, and whether EUR 300m (2027) and EUR 450m a year (2028-29) is plausible. Section 7 says what is needed.
+- **Population level (conditional on assumed owner mixes).** The number of company owners falls: 3.7% of S0 would leave if every owner optimised strictly (only those whose advantage turns negative), and 7% by 2040 under a response of 2% per percentage point of lost advantage (an assumption); the number of entrepreneurs including sole traders falls only if leavers become employees or stop. Static revenue from all three measures in 2028-29 has a median of EUR 164m over 4,000 random owner mixes and is negative in 28% of them; 25% of mixes reach EUR 450m, and 52% reach EUR 300m in 2027 from P1 alone. Owners who switch to a sole trader or employee job *raise* revenue; the gain is cancelled only if roughly a third of leavers stop working. The national wealth Gini moves by at most 0.008 for the measures and 0.021 for abolishing management companies altogether.
 
 ![Headline](figures/01_headline.png)
 
@@ -69,6 +69,10 @@ Two views of how an owner responds are reported: **static** (keep the strategy t
 
 65 automated tests: hand-computed worked examples for every tax function and for whole one-year cases of each arrangement and each proposal (arithmetic in `worked_examples.md`); invariants (the ledger reconciles under every proposal and combination, a proposal can only hurt a fixed strategy, tighter parameters hurt more, the employee and sole trader are untouched, a no-change policy path equals the baseline, a company that pays out all profit equals a sole trader with the same costs). These tests check the code against the *supplied* rules; no official published example was available, so they do not confirm the rules. The pruned and parallelised comparison B reproduces the earlier full grid exactly (12,120 shared rows, maximum difference 0).
 
+### 3.6 Population layer (comparison C): what is assumed
+
+Per-owner results (above) are combined into a population of S0 owners. **Nothing in this layer is estimated from data.** The inputs are swept: (a) the **size of S0**: 351,000 zero-employee BV/SRL SMEs (supplied; the 73.7% share is unverified), varied from 200,000 to 450,000; (b) the **owner mix**: revenue (lognormal, median EUR 45-150k), payout strategy (eight types, random shares), client concentration (share with exactly one client 0-100%), independent of each other, in 4,000 random draws plus an illustrative central mix; (c) **entry and exit**: the number of owners of a type falls to exp(-s x loss) of today's, where loss is the fall of the owner's advantage over a sole trader in percentage points of revenue, adjusted with a three-year lag; s = 1-10% per point (s = 2% is anchored on a UK finding that 10% more tax savings raise the incorporation hazard by 2.3%, a figure seen only in a search snippet and not verified); a strict bound counts only owners whose advantage turns from non-negative to negative; (d) **where leavers go**: a share who stop all activity (their tax is lost), the rest employee or sole trader; (e) the **national wealth distribution**: rebuilt from observed HFCS 2023 aggregates (deciles, mean, Gini 0.604; the rebuilt Gini is 0.596), 5.2 million households (derived in the earlier model), S0 owners placed at assumed percentiles of that distribution. Households are a single owner unless stated. Owners are either assumed to keep their planning or to re-plan after the measures.
+
 ## 4. Data taken
 
 No new web data were collected for these runs; inputs are the owner's supplied rules, official statistics found in earlier sessions, and stylised assumptions. Full registry: `data/sources.yaml`, `docs/rules_inputs.md`, `docs/evidence_found.md`.
@@ -83,6 +87,7 @@ No new web data were collected for these runs; inputs are the owner's supplied r
 | BV/SRL, all sizes, 2024 | 477,126 (context) | Statbel BeStat | checked |
 | BV/SRL SMEs and share without employees | 476,914 and 73.7%, i.e. about 351,000 (context and plausibility arithmetic) | FPS Economy via project owner | supplied, share unverified |
 | Zero-employee enterprises, births, deaths (2024) | 729,925; 67,369; 50,325 (context) | Eurostat | checked (different definition) |
+| Net wealth of Belgian households (median, mean, deciles, Gini, top shares) and household count | EUR 254,200 median; EUR 411,500 mean; Gini 0.604; about 5.2 million households | ECB HFCS wave 2023 (observed, in `data/`); household count derived in the earlier model from published composition data | observed / derived |
 | Shock sizes, running costs, paid-up capital | wage shock sd 0.08 / persistence 0.9; business shock sd 0.25 / 0.6; EUR 1,000 and 4,000 a year; EUR 12,000 | stylised assumptions of the earlier `belgium_abm` model | assumed |
 | Household spending needs, partner income | EUR 24,000 + 12,000 partner + 6,000 per child; partner nets EUR 30,000 | placeholders | assumed |
 | Client concentration of owners | mean largest-client share 50-100% with assumed fluctuation | none exists | **not data** |
@@ -141,13 +146,56 @@ Share of the advantage removed by P3 (EUR 100,000 revenue, single owner, re-opti
 
 Per owner and year, under all three measures with static behaviour at EUR 100,000 revenue and one client: an owner paying EUR 51,000 plus annual dividends pays about EUR 5,801 more in 2028-29; an owner on the liquidation reserve with EUR 51,000 pay pays EUR 1,492 *less*, and one on minimum pay EUR 4,267 less; the reserve owners' extra tax then arrives in the liquidation year (2040: +130,730 and +162,142). The 2040 figure is partly an artefact of a fixed 15-year horizon; in a population companies close at different times. For P1 alone in 2027 the owners who pay EUR 51,000 or more pay about EUR 1,726-1,895 more a year and the others nothing. Illustrative arithmetic only: raising EUR 300 million in 2027 from P1 alone would need about 173,793 owners of the first archetype, against about 351,000 zero-employee BV/SRL SMEs (share unverified); raising EUR 450 million a year in 2028-29 from the combined measures would need about 77,568 annual-dividend owners at this revenue level; owners using the reserve contribute less, not more, in those years. The real population is a mixture of owner types that is not known, so this is a scale check, not a validation of the draft's figure.
 
+### 5.4 Population-level tests (conditional on assumed owner mixes)
+
+Everything in this subsection rests on the assumptions listed in 3.6; the figures show ranges over those assumptions, not estimates. The full list of 18 hypotheses with tests, evidence and verdicts is in [`hypotheses.md`](hypotheses.md).
+
+**Number of owners and entrepreneurs.** If every owner optimised strictly, so that only owners whose advantage actually turns negative leave (a bound that needs no elasticity but assumes perfect optimisation), 3.7% of S0 would leave under all three measures (about 13,000 of 351,000); P2 alone makes nobody leave and P1 or P3 alone about 1.7%. With a smooth response the number of company owners falls by 6.9% by 2040 at s = 2% and 27.7% at s = 10%. The count of *entrepreneurs*, which includes sole traders, falls about half as much when half of the leavers become employees (3.4% at s = 2%), and not at all if every leaver becomes a sole trader.
+
+![Entrepreneur counts](figures/10_entrepreneur_counts.png)
+
+**Budget across owner mixes.** Over 4,000 random mixes the static revenue of all three measures in 2028-29 has a median of EUR 164m (5th-95th percentile EUR -404m to 1,070m); 25% of mixes reach EUR 450m and 28% give negative revenue. P1 alone in 2027: median EUR 309m, 52% of mixes reach EUR 300m. What drives it (rank correlation with the 2028-29 result): the share of owners on the liquidation-reserve routes (-0.55) and of optimisers (-0.35) lower it, the share paying EUR 51k with dividends raises it (+0.35); revenue level (+0.20) and the size of S0 (+0.13) matter less; the share with one client hardly at all (-0.02). The 'central' mix used in the other figures is illustrative, chosen by me, and is not evidence: that it gives about EUR 450m is a coincidence of the assumption.
+
+![Budget range](figures/08_budget_range_across_mixes.png)
+
+![Tornado](figures/11_tornado.png)
+
+**Do behavioural responses cancel the gain?** Leavers who become sole traders or employees *raise* revenue, because they pay more than company owners do (EUR 875m against EUR 433m static at s = 2%). The response cancels the gain only if about 37% of leavers stop working altogether, and takes revenue to zero at 46-74% at the central mix. Put differently, EUR 450m of revenue is wiped out if about 11,664 owners (3.3% of S0) stop all activity at the central mix (median 3,997 across random mixes). Stopping, emigrating or cutting activity is what matters for this hypothesis, not switching legal form; none of these can be calibrated from the data found.
+
+![Break-even](figures/09_breakeven.png)
+
+**Wealth distribution.** The measures cost the average owner about EUR 80k of 15-year accumulated wealth (1.3% of national net wealth in total), but the national Gini (rebuilt from observed HFCS aggregates, 0.596 against 0.604) moves by only -0.0003 to +0.0083; the bounding case in which every owner becomes a sole trader or employee moves it by +0.0019 to +0.0211. The sign depends on where owner-manager households sit in the national distribution (an assumption): taking wealth from households below the mean raises measured inequality and taking it from households above the mean lowers it. As a budget ceiling, abolishing management companies would add EUR 5.2-8.4bn a year in 2028-29, about 6% of which the combined measures capture. National top-wealth results are bounds only (closely held large companies and holdings are not in the model).
+
+**Verdicts at a glance** (details in `hypotheses.md`):
+
+| # | hypothesis | verdict |
+|---|---|---|
+| H1 | A one-person company gives a material tax advantage over working as an employee or a sole trader (the project owner's starting point). | **Supported** (on the supplied, unconfirmed rules; employee allowances not modelled) |
+| H2 | The advantage comes from retaining profits and extracting a lump sum after 3-5 years (deferral). | **Not supported.** The rate gap between the 10-18% exit and the 45-50% marginal rate on salary is the source; deferral is a minor extra |
+| H3 | Many one-person companies exist for tax optimisation (prevalence). | **Cannot be tested** with the available data (needs the distribution of director pay, retained profits and revenue in S0). Conditional table only |
+| H4 | The proposals remove a large part of the company advantage. | **Supported for owners with one client; not supported for owners below the client threshold** |
+| H5 | The measures affect different owners very differently. | **Supported** |
+| H6 | P1 can be avoided by hiring one employee. | **Not supported** (hiring is rarely worth it; strategy switching is the avoidance) |
+| H7 | P2 can be offset by paying a higher salary. | **Partly supported** (small offset at mid revenue only) |
+| H8 | The P3 threshold and lookback matter. | **Conditional on client concentration**, which is unknown |
+| H9 | The number of company owners (management companies) falls. | **Supported in sign; the size is conditional** on a sensitivity that no Belgian estimate identifies |
+| H10 | The number of entrepreneurs (company owners plus sole traders) falls. | **Not supported in general**: it depends on where leavers go |
+| H11 | Owner-manager households accumulate less wealth. | **Supported** (conditional on rules and mix) |
+| H12 | The national wealth distribution barely moves, bounded by the 'no management companies' case. | **Supported** (movement is small; direction not identified) |
+| H13 | The measures improve the budget. | **Conditional**: P1 yes; the P2/P3 part can lower revenue in 2028-39 |
+| H14 | The government's EUR 300m (2027) and EUR 450m a year (2028-29) are attainable. | **Plausible but not implied**; needs few reserve-route owners and many EUR 51k-pay dividend owners |
+| H15 | The revenue profile is back-loaded (deferral). | **Supported** for reserve-route owners |
+| H16 | Behavioural responses cancel the static budget gain. | **Not supported for switching of arrangement; supported only for loss of activity** (stopping, emigration, reduced effort) |
+| H17 | Abolishing management companies altogether would raise far more than the draft. | **Supported** (an upper bound, not a policy option) |
+| H18 | The conclusions are robust to the assumptions. | **Per-owner results robust; budget results not robust** to the owner mix |
+
 ## 6. What this means for the three questions
 
-| question | what the model supports | what it does not support |
+| question | what the model supports (conditional) | what it cannot say |
 |---|---|---|
-| Fewer entrepreneurs? | Under current law the company beats a sole trader only above about EUR 43k of revenue and gains most at high revenue; the measures cut that gain by roughly half for a one-client owner and raise the break-even revenue to about EUR 51k. Whether anyone leaves depends on how responsive the choice of arrangement is. | A count. No Belgian elasticity exists in what was found; the number can only be given as a function of an assumed sensitivity, with the break-even sensitivity (planned). |
-| Wealth distribution? | For owner-manager households the measures lower the tax-sheltered wealth they can build (the loss columns). | A national distribution result: needs the population model and the bounding 'no management companies' scenario; the national tail is not identified by public data. |
-| Budget? | Mechanically, who pays more and when (5.3), including that some owner types pay *less* early on. | Whether EUR 300m / 450m is reached: needs the number of owners of each type, which is unknown, and behavioural responses. |
+| Fewer entrepreneurs? | If every owner optimised strictly, 3.7% of S0 would leave (those whose advantage turns negative); a smooth response of 2% per percentage point (an assumption, anchored on an unverified UK figure) gives 7% fewer company owners by 2040; entrepreneurs including sole traders fall only if leavers become employees or stop. | The size: no Belgian estimate of the response exists in what was found; S0 itself is uncertain (351,000 supplied, share unverified). |
+| Wealth distribution? | Owner-manager households end up about EUR 80k poorer on average over 15 years; the national Gini moves by less than 0.008 (bound for abolition: 0.021). | The direction (depends on where owners sit nationally) and the top tail. |
+| Budget? | P1 alone brings positive revenue in every mix (median EUR 309m in 2027); all three give a median of EUR 164m in 2028-29 with a wide range (25% of mixes reach EUR 450m, 28% are negative); revenue is back-loaded for owners on the reserve route; switching legal form raises revenue, only stopping activity cancels it. | Whether the draft's EUR 300m / 450m is right: that needs the real mix of owners (pay, retained profits, clients), which no public data give. |
 
 ## 7. Limitations and what is needed next
 
@@ -159,11 +207,11 @@ Per owner and year, under all three measures with static behaviour at EUR 100,00
 - **Constant 2026 euros, 15-year horizon with liquidation in 2040** (an artefact for late-year effects).
 - Full list: `limitations.md`.
 
-**Next steps** (need the project owner's go-ahead): (1) confirm the hand-check list and supply the draft text; (2) supply or find the open inputs - director pay and retained profits in S0, the share of S0 with one client and with a single director; (3) WP3-4: choice of arrangement with a swept sensitivity, a population of owners, the 'no management companies' bounding case and the break-even sensitivity against EUR 450 million.
+**What would improve the answers** (the project owner has no additional data, so these are listed, not planned): (1) confirm the hand-check list and supply the draft text; (2) owner-level data on director pay, retained profits, revenue and client concentration in S0 (form 281.20, NBB annual accounts), which would replace the sweeps over the owner mix and make the budget hypotheses testable; (3) a Belgian estimate of how owners respond to tax differences, which would replace the swept sensitivity; (4) validation against stock and flow counts of zero-employee companies. Until then the population-level results remain bounds and sweeps.
 
 ## 8. Figures for sharing, with suggested captions
 
-All figures are in `docs/figures/` (PNG, 2400 x 1350, 16:9, light background; the values behind each are in `docs/figures/figure_data.csv`). Each image carries its own caveat footer. **Before posting:** the numbers rest on rules that have not been confirmed against primary sources and on scenario assumptions for the proposals; confirm the hand-check list first, and keep the caveat in the post, because a screenshot travels without this report.
+All figures (11) are in `docs/figures/` (PNG, 2400 x 1350, 16:9, light background; the values behind each are in `docs/figures/figure_data.csv`). Each image carries its own caveat footer. **Before posting:** the numbers rest on rules that have not been confirmed against primary sources and on scenario assumptions for the proposals; confirm the hand-check list first, and keep the caveat in the post, because a screenshot travels without this report.
 
 **01_headline.png** - Model of Belgian one-person companies (BV): at EUR 100k revenue the best-planned company beats a sole trader by about EUR 13.5k a year today. Under scenarios built from the reported draft, a one-client owner keeps about EUR 6k of that; an owner with several clients is barely touched by the client test. Model result on unconfirmed rules, not a forecast.
 
@@ -179,17 +227,27 @@ All figures are in `docs/figures/` (PNG, 2400 x 1350, 16:9, light background; th
 
 **07_timing.png** - Same reform, opposite sign for revenue in the first years in the model: owners paying annual dividends pay more at once; owners using the liquidation reserve stop paying its 10% levy and are taxed only at liquidation. The mix of owner types decides the budget profile.
 
+**08_budget_range_across_mixes.png** - Over 4,000 random mixes of owner types, the model gives anything from a loss to over EUR 1bn for the draft's extra revenue: the median is ~EUR 164m in 2028-29 against EUR 450m projected, and 25% of mixes reach it. Nobody knows the real mix. Assumption-driven sweep, not an estimate.
+
+**09_breakeven.png** - In the model, owners who leave a one-person company for a sole-trader or employee job raise tax revenue; the gain is cancelled only if over a third of leavers stop working altogether. Illustrative owner mix; response sizes are assumptions.
+
+**10_entrepreneur_counts.png** - How many company owners leave depends on an unknown sensitivity (~4% of S0 if every owner optimises strictly, up to ~28% at a high response). Entrepreneurs including sole traders fall only about half as much, and not at all if leavers become sole traders. Assumption-driven.
+
+**11_tornado.png** - What moves the budget number most in the model: the mix of how owners pay out profit (from -EUR 1bn to +EUR 0.5bn), then median revenue and the size of the group. The proposal parameters matter least. One-at-a-time sweep from an illustrative central mix.
+
 ## 9. Where everything is
 
 | file | content |
 |---|---|
 | `docs/report.md` | this report |
 | `docs/comparison_A_results.md`, `docs/comparison_B_results.md` | detailed result tables |
+| `docs/hypotheses.md` | all 18 hypotheses: test, evidence, verdict |
+| `outputs/population/` | per-owner tax paths and the population sweeps |
 | `docs/rules_inputs.md`, `docs/hand_check_list.md` | rules, statuses, readings, what to confirm |
 | `docs/worked_examples.md`, `docs/implementation_design.md` | hand-computed examples; how the engine is built |
 | `docs/limitations.md`, `docs/data_requirements.md`, `docs/evidence_found.md` | limits, data needs, evidence found |
 | `configs/` | policy, assumptions and proposal switches (one entry per rule with status and source) |
 | `outputs/` | all result tables and manifests |
-| `scripts/` | `run_comparison_a.py`, `run_comparison_b.py` (about 2 minutes), `make_report_*.py`, `make_figures.py` |
+| `scripts/` | `run_comparison_a.py`, `run_comparison_b.py` (about 2 minutes), `run_population_inputs.py` (about 70 s), `run_population.py` (about 10 s), `make_report_*.py`, `make_hypotheses.py`, `make_figures.py` |
 
-Reproduce: `pip install -e <belgium_abm>; pip install numpy pandas pyyaml pytest matplotlib; pytest; python scripts/run_comparison_a.py; python scripts/run_comparison_b.py; python scripts/make_report_a.py; python scripts/make_report_b.py; python scripts/make_figures.py; python scripts/make_report_main.py`.
+Reproduce: `pip install -e <belgium_abm>; pip install numpy pandas pyyaml pytest matplotlib; pytest; python scripts/run_comparison_a.py; python scripts/run_comparison_b.py; python scripts/run_population_inputs.py; python scripts/run_population.py; python scripts/make_report_a.py; python scripts/make_report_b.py; python scripts/make_hypotheses.py; python scripts/make_figures.py; python scripts/make_report_main.py`.

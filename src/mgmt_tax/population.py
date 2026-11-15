@@ -120,12 +120,14 @@ def periods(v: np.ndarray) -> dict[str, float]:
 def dynamic(mix: Mix, X: dict, scn: str, s: float, phi: float, eps: float, tau: float = 3.0, strict: bool = False) -> dict:
     """Entry/exit response.  loss_pp = fall in the owner's advantage over a sole trader in percentage points of revenue a year; the target stock of owners
     of the type is exp(-s * loss_pp) of today's (s = proportional fall per percentage point), approached with a lag of ``tau`` years from the start
-    year of the scenario.  strict=True instead makes every owner whose advantage turns negative leave (the perfect-optimiser bound).  Leavers: a share
+    year of the scenario.  strict=True instead makes every owner whose advantage turns from non-negative to negative leave (the perfect-optimiser bound).  Leavers: a share
     phi stops all activity (their tax is lost), the rest becomes an employee (share eps) or a sole trader."""
     W = mix.W() * mix.N0
     loss_pp = np.clip((X["base_w"] - X["scn_w"]) / (len(YEARS) * PROF[None, None, :]) * 100.0, 0.0, None)
     adv_scn = X["scn_w"] - X["sole_w"][None, None, :]
-    f = np.where(adv_scn < 0, 0.0, 1.0) if strict else np.exp(-s * loss_pp)
+    adv_base = X["base_w"] - X["sole_w"][None, None, :]
+    # strict bound: only owners who FLIP (advantage >= 0 today, < 0 after the measures) leave because of the policy; owners already worse off today stay for other reasons
+    f = np.where((adv_base >= 0) & (adv_scn < 0), 0.0, 1.0) if strict else np.exp(-s * loss_pp)
     f = np.minimum(f, 1.0)
     N = np.zeros((len(CATS), len(CONCS), len(PROF), T))
     N[..., 0] = W

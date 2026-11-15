@@ -31,7 +31,8 @@ retain profits, and take a large lump sum out after 3-5 years at a low rate (VVP
 | `docs/implementation_design.md` | how the engine is built, how it uses `belgium_abm`, the tests |
 | `docs/worked_examples.md` | the hand-computed examples behind the unit tests |
 | `docs/report.md` | **the stand-alone report**: motivation, methodology and scenarios, data taken, results with figures, limitations, suggested captions |
-| `docs/figures/` | seven social-media-ready charts (PNG 2400x1350) and `figure_data.csv` with the values behind them |
+| `docs/hypotheses.md` | all 18 hypotheses: how each was tested, the evidence and the verdict |
+| `docs/figures/` | eleven social-media-ready charts (PNG 2400x1350) and `figure_data.csv` with the values behind them |
 | `docs/comparison_A_results.md` | employee vs sole trader vs one-person BV under current (supplied) rules |
 | `docs/comparison_B_results.md` | the same comparison under P1, P2 (2x, 3x), P3 (threshold x lookback grid) and combined, as scenario assumptions |
 | `docs/hand_check_list.md` | generated list of rule values to confirm against primary sources |
@@ -40,7 +41,7 @@ retain profits, and take a large lump sum out after 3-5 years at a low rate (VVP
 
 ## Status
 
-WP1 (tax engine), comparison A and comparison B are done **on rules supplied by the owner and not independently confirmed, with proposal parameters as scenario assumptions**; no entrepreneur-count or budget result exists yet (WP3-4). Every number quoted from outside sources is flagged *unverified* until checked against the
+WP1 (tax engine), comparisons A and B and the population-level sweeps (comparison C) are done **on rules supplied by the owner and not independently confirmed, with proposal parameters as scenario assumptions**; the population-level results (entrepreneur counts, budget, wealth distribution) are **bounds and sweeps over assumed owner mixes, not estimates**: no data identify the owner mix or the response of owners. Every number quoted from outside sources is flagged *unverified* until checked against the
 primary source. Results from the earlier `belgium_abm` runs used an illustrative policy file and must not be quoted for this question.
 
 ## Reproduce
@@ -48,11 +49,14 @@ primary source. Results from the earlier `belgium_abm` runs used an illustrative
 ```bash
 pip install -e /path/to/belgium_abm        # branch claude/statbel-data-integration-maq0e5 (only its crn module is used)
 pip install numpy pandas pyyaml pytest
-python3 -m pytest -q                        # 65 tests (worked examples, proposal mechanics, invariants)
+python3 -m pytest -q                        # 76 tests (worked examples, proposal mechanics, invariants)
 python3 scripts/run_comparison_a.py         # writes outputs/comparison_A/
 python3 scripts/make_report_a.py            # writes docs/comparison_A_results.md and docs/hand_check_list.md
 python3 scripts/run_comparison_b.py         # about 2 minutes on 4 cores; writes outputs/comparison_B/
 python3 scripts/make_report_b.py            # writes docs/comparison_B_results.md
+python3 scripts/run_population_inputs.py    # about 70 s; per-owner tax paths for every scenario
+python3 scripts/run_population.py           # about 10 s; population sweeps and bounds
+python3 scripts/make_hypotheses.py          # writes docs/hypotheses.md
 python3 scripts/make_figures.py             # writes docs/figures/
 python3 scripts/make_report_main.py         # writes docs/report.md
 ```

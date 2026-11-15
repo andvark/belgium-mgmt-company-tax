@@ -70,6 +70,13 @@ def test_partial_adjustment_converges():
     assert gap[-1] < gap[2] and (np.diff(d["bv_owners"][2:]) <= 1e-9).all()
 
 
+def test_strict_bound_ignores_owners_already_worse_off_today():
+    mix, X = toy()
+    X["base_w"][0, 0, 5] = 200000.0      # worse than the sole trader (300,000) already today
+    X["scn_w"][0, 0, 5] = 150000.0
+    assert pop.dynamic(mix, X, "P2x2_2028", 0, 0, 0, tau=1.0, strict=True)["leavers"].max() == 0   # not a policy-induced leaver
+
+
 def test_strict_bound_only_owners_with_negative_advantage_leave():
     mix, X = toy()
     assert pop.dynamic(mix, X, "P2x2_2028", 0, 0, 0, strict=True)["leavers"].max() == 0       # 440,000 > 300,000 sole trader: nobody leaves
