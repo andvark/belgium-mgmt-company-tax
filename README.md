@@ -32,5 +32,5 @@ retain profits, and take a large lump sum out after 3-5 years at a low rate (VVP
 
 ## Status
 
-Plan drafted, nothing estimated. Every number quoted from outside sources is flagged *unverified* until checked against the
+Plan drafted, inputs partly settled (segment, alternatives, horizon, 2026 rates as supplied), nothing estimated. Every number quoted from outside sources is flagged *unverified* until checked against the
 primary source. Results from the earlier `belgium_abm` runs used an illustrative policy file and must not be quoted for this question.

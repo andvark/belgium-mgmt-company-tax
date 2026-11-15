@@ -45,7 +45,7 @@ accommodates it: B already runs each proposal alone and combined.
 
 | WP | content | deliverable | dependency | acceptance test |
 |---|---|---|---|---|
-| **0. Rules and data** | Verify the supplied rules against primary sources; fill missing parameters; settle definitions (what is a "management company"); acquire counts | `rules_inputs.md` completed, `sources.yaml` statuses | project owner input | every rule has source, date, status |
+| **0. Rules and data** | Confirm the supplied rules against primary pages (blocked from this session: list in `rules_inputs.md` section F); fill missing parameters; segment definition settled (S0, S1); counts partly checked | `rules_inputs.md` completed, `sources.yaml` statuses | project owner input | every rule has source, date, status |
 | **1. Tax engine for the three arrangements** | Encode the verified rules as a versioned policy; owner strategy with vintaged reserves (lock period) and liquidity constraint; household variants | policy file + unit tests with hand-computed worked examples | WP0 | reproduces published worked examples; invariants: no double counting, ledger reconciles |
 | **2. Comparisons A and B** | Run the three arrangements under current law and each proposal over a grid of profit levels and household types, with paired shocks | tables, plots, break-even profit levels | WP1 | monotone sanity checks; BV advantage at the threshold behaves as the rules imply |
 | **3. Choice of arrangement and calibration** | Entry/exit as a function of net advantage; calibrate taste term to the stock of zero-employee BVs and observed births and closures; sweep the sensitivity | calibrated module, sensitivity grid | WP1, WP2, data | baseline reproduces stock and flows within tolerance |
@@ -62,18 +62,40 @@ accommodates it: B already runs each proposal alone and combined.
 - **Fairness:** net income of equal-productivity workers by arrangement before and after the proposals (horizontal equity).
 - **Winners and losers:** by profit level, household type, region, age.
 
-## 6. Design choices to settle
+## 6. Design choices (settled and open)
 
-1. Population: one-person BV owners only, or all BV owners (default: zero-employee BVs, as the draft's rule applies to every company without staff).
-2. Alternative arrangements: employee and sole trader (default: both).
-3. Horizon: 2026-2040 (default), calendar-year policy path.
-4. Optimisation: heuristic strategy (default) vs full dynamic programme (rejected for now: opaque and slow).
-5. Household: individual taxation plus family allowances (default), partner income held fixed.
-6. Scale: separate cohort calibrated to the real stock (default) vs oversampling in the full population.
+**Settled by the project owner (15 November 2026):** segment S1 = zero employees, single director, one client (S0 = zero employees only, reported alongside); alternatives = employee and sole trader; horizon 2026-2040.
+
+Open (defaults in brackets):
+
+1. Optimisation: heuristic strategy including **exit route and timing** (liquidation reserve at about 10% vs dividend after three years at about 18% vs 30% ordinary) (default) vs full dynamic programme (rejected for now).
+2. Household: individual taxation with the EUR 11,550 allowance applied as a 25% tax reduction (EUR 2,887.50), partner income held fixed (default).
+3. Scale: separate cohort calibrated to the real stock of S0 (about 351,000 zero-employee BV/SRL SMEs, unverified share) with S1 as a flagged fraction once its size is known (default) vs oversampling in the full population.
+
+## 6b. Scenario grid
+
+| scenario | definition |
+|---|---|
+| Baseline | current rules as supplied (see `rules_inputs.md`), start of policy path 2026 |
+| P1 | reduced rate withdrawn for S0 from 2027 (20% -> 25% on first EUR 100,000); employee test open: sub-scenarios "no hire", "minimal hire at cost c" with take-up swept |
+| P2 | dividend regimes require payroll >= 2x (or 3x) the dividend, from 1 January 2028; separate scenarios for 2x and 3x |
+| P3 | reduced dividend regimes withdrawn for single-client single-director companies for new amounts from 2028; client threshold grid (for example 70, 80, 90, 100%) and lookback grid (3, 5 years) |
+| Combined | P1 + P2 + P3 |
+| No management companies | bounding case: S1 (and S0 as a variant) converted to employees or sole traders |
+
+## 6c. Required corrections to the existing engine
+
+- income-tax allowance as a 25% tax reduction after applying the brackets (currently deducted from income first);
+- municipal surcharge (7.2% of income tax);
+- employee comparison with 13.07% employee and 25% employer contributions, comparing contracting income with total employer cost;
+- two-rate corporate tax with the director-remuneration condition;
+- dividend regimes, vintaged liquidation-reserve account with a three-year lock, liquidation-route tax and the anti-abuse rule;
+- policy path by calendar year.
 
 ## 7. Risks
 
-- Rules supplied are partial and some conflict with other sources; results are only as good as WP0.
+- Rules supplied are partial and the primary pages could not be opened from this session; results are only as good as WP0.
+- The drafts of P2 and P3 are known only through second-hand excerpts (2x/3x and 90% are scenario values); results must be labelled as scenarios, not as the proposal.
 - The behavioural sensitivity is not identified from Belgian data; conclusions on entrepreneur numbers are conditional (see `limitations.md`).
 - The draft is still being negotiated: parameters (notably the payroll multiple in proposal 2) are open, so scenarios must be parameterised, not hard-coded.
 - The count of "management companies" is uncertain (see `evidence_found.md`): calibration targets may be wrong by a large factor.

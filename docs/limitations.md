@@ -31,6 +31,7 @@ Stated up front so that no result is read as more than it is.
 19. **Lifetime comparison uses simulated paths** with assumed earnings persistence and business risk; those parameters are not identified from public data (sensitivity reported).
 20. **Pensions** are valued with a stylised rule unless verified statutory formulas are added.
 21. **Sample noise:** even with oversampling, results for the top tail rest on few households; intervals across replicates are reported, and small groups are flagged.
+23. **Source quality for the draft:** P2 (2x/3x) and P3 (client threshold, lookback) rest on second-hand excerpts; results are labelled as scenarios and replaced once the draft text is available.
 22. **Policy status:** the proposals are drafts, parameters are open, and baseline rules may change before any result is published; every table states the policy version and date.
 
 ## What the study can credibly claim

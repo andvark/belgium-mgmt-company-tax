@@ -7,10 +7,10 @@
   status: not_acquired
   notes: partly supplied by the project owner in docs/rules_inputs.md; unverified; includes conflicting allowance figures
 - id: zero_employee_bv_counts
-  need: number of zero-employee BVs, single-director share, creations and closures
-  source: Crossroads Bank for Enterprises (KBO/BCE); Statbel enterprise demography; FPS Finance
+  need: number of zero-employee BVs, single-director share, one-client share, creations and closures
+  source: Statbel VAT-enterprise tables by legal form and employer class (2025 download); FPS Economy SME statistics; Crossroads Bank for Enterprises (KBO/BCE)
   status: candidate
-  notes: scale hints only (Eurostat bd_size: 729,925 zero-employee enterprises all forms); a claim of more than 80,000 management companies is unverified
+  notes: checked via Statbel BeStat API - 997,481 VAT-registered enterprises with no employees in 2024 (view 7f159942), 477,126 BV/SRL of all sizes (legal-form view). FPS Economy figure 476,914 BV/SRL SMEs with 73.7% zero-employee (about 351,000) supplied but page unreachable. Single-director and one-client shares not found
 - id: nbb_small_company_accounts
   need: remuneration, retained earnings, dividends, turnover of small companies (aggregates or bunching around the pay threshold)
   source: National Bank of Belgium Central Balance Sheet Office
@@ -50,3 +50,13 @@
   source: Eurostat (lfsa_esgaed, bd_l_form, bd_size)
   status: acquired
   notes: pulled through the belgium_abm Eurostat client; reuse its cache
+- id: statbel_vat_enterprises_2025_download
+  need: zero-employee BV/SRL count by legal form x employer class x region, latest year
+  source: Statbel open data "Enterprises subject to VAT by legal form" (2025 file)
+  status: not_acquired
+  notes: the website is behind an anti-bot challenge from this session; the project owner can download it manually
+- id: draft_text_p2_p3
+  need: the draft or reliable press quotations for the payroll multiple (P2) and the client test (P3)
+  source: published draft; reliable press
+  status: not_acquired
+  notes: current values (2x/3x; 90%) come from Reddit reposts and are scenario assumptions only
