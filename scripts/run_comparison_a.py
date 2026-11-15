@@ -10,7 +10,7 @@ from mgmt_tax.compare_a import HOUSEHOLDS, run_grid  # noqa: E402
 from mgmt_tax.policy import PathChange, PolicyPath, load_policy  # noqa: E402
 
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "outputs" / "comparison_A"
-pol = load_policy(ROOT / "configs" / "policy_be_2026_supplied.yaml", ROOT / "configs" / "assumptions.yaml")
+pol = load_policy(ROOT / "configs" / "policy_be_2026_supplied.yaml", ROOT / "configs" / "assumptions.yaml", ROOT / "configs" / "proposals.yaml")
 
 # label -> rule overrides applied from 2026.  Sensitivities change ONE input at a time; they are not alternative laws.
 CASES = {

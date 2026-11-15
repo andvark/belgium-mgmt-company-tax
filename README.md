@@ -31,13 +31,14 @@ retain profits, and take a large lump sum out after 3-5 years at a low rate (VVP
 | `docs/implementation_design.md` | how the engine is built, how it uses `belgium_abm`, the tests |
 | `docs/worked_examples.md` | the hand-computed examples behind the unit tests |
 | `docs/comparison_A_results.md` | employee vs sole trader vs one-person BV under current (supplied) rules |
+| `docs/comparison_B_results.md` | the same comparison under P1, P2 (2x, 3x), P3 (threshold x lookback grid) and combined, as scenario assumptions |
 | `docs/hand_check_list.md` | generated list of rule values to confirm against primary sources |
 | `configs/` | `policy_be_2026_supplied.yaml` (rules, one entry each with status and source), `assumptions.yaml` |
 | `data/sources.yaml` | registry of datasets to acquire (all `not_acquired` at this stage) |
 
 ## Status
 
-WP1 (tax engine) and comparison A are done **on rules supplied by the owner and not independently confirmed**; no proposal (P1-P3) has been run, and no entrepreneur-count or budget result exists. Every number quoted from outside sources is flagged *unverified* until checked against the
+WP1 (tax engine), comparison A and comparison B are done **on rules supplied by the owner and not independently confirmed, with proposal parameters as scenario assumptions**; no entrepreneur-count or budget result exists yet (WP3-4). Every number quoted from outside sources is flagged *unverified* until checked against the
 primary source. Results from the earlier `belgium_abm` runs used an illustrative policy file and must not be quoted for this question.
 
 ## Reproduce
@@ -45,7 +46,9 @@ primary source. Results from the earlier `belgium_abm` runs used an illustrative
 ```bash
 pip install -e /path/to/belgium_abm        # branch claude/statbel-data-integration-maq0e5 (only its crn module is used)
 pip install numpy pandas pyyaml pytest
-python3 -m pytest -q                        # 44 tests (worked examples, invariants)
+python3 -m pytest -q                        # 64 tests (worked examples, proposal mechanics, invariants)
 python3 scripts/run_comparison_a.py         # writes outputs/comparison_A/
 python3 scripts/make_report_a.py            # writes docs/comparison_A_results.md and docs/hand_check_list.md
+python3 scripts/run_comparison_b.py         # about 11 minutes; writes outputs/comparison_B/
+python3 scripts/make_report_b.py            # writes docs/comparison_B_results.md
 ```

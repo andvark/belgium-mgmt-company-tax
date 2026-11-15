@@ -37,3 +37,9 @@ rules:
     {value: 2026, status: assumed, source: "first year of the horizon", hand_check: false}
   asm.end_year:
     {value: 2040, status: assumed, source: "last year of the horizon (decision of the project owner: 2026-2040)", hand_check: false}
+  asm.client_share_sd:
+    {value: 0.08, status: assumed, source: "year-to-year fluctuation (sd, share points) of the owner's largest-client share around the owner's mean concentration; no Belgian data; used only by proposal 3", hand_check: false}
+  asm.client_share_rho:
+    {value: 0.5, status: assumed, source: "persistence of the client-share fluctuation; used only by proposal 3", hand_check: false}
+  asm.client_share_burn_in_years:
+    {value: 5, status: assumed, source: "years of history before 2026 so that the lookback window is defined from the first year", hand_check: false}

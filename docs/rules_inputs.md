@@ -130,3 +130,19 @@ Readings of ambiguous supplied wording (please confirm):
 Not modelled and flagged: a possible dividend-vs-paid-up-capital condition on the 20% rate (the engine raises an error if switched on), VVPRbis eligibility conditions and any waiting period, benefits in kind, family tax rules, tax-advantaged private pension saving, indexation of thresholds, loss carry-forward.
 
 New items for section F (primary-source check): the two readings above, VVPRbis conditions, the dividend-vs-capital condition, the anti-abuse consequence.
+
+## I. How the three proposals are encoded (WP2, comparison B)
+
+All parameters live in `configs/proposals.yaml` with status `scenario` and are OFF in the baseline; a `PolicyPath` switches them on from a calendar year. **None is "the proposal"**: the draft text was not available (see section D and `data/sources.yaml`, `draft_text_p2_p3`).
+
+| proposal | encoding | choices that are mine, not the draft's |
+|---|---|---|
+| P1, from 2027 (also run from 2028) | the 20% rate on the first EUR 100,000 additionally requires a paid employee (rule `p1.reduced_rate_requires_employee`); an owner can hire at annual employer cost c (EUR 5,000-20,000 swept; c = 1 as a diagnostic) | what counts as an employee; the cost of the cheapest qualifying hire; the hire is a cost that leaves the system (tax on the hire's wage is not counted); the existing EUR 51,000 pay condition is kept |
+| P2, from 2028 (also 2027), m = 2 and 3 | each year the reduced regimes (VVPRbis dividends, liquidation-reserve allocations and dividends) are limited to payroll / m (`p2.payroll_multiple`); payroll = director pay + a hired employee's gross wage, same calendar year | the payroll period (same year), the treatment of the excess (dividends taxed at 30%; allocations stay in the free reserve), application to old reserves (yes), exemption of liquidation payouts (yes) |
+| P3, from 2028, threshold 70/80/90/100%, lookback 3/5 years | when the owner's largest-client share was >= threshold in every year of the lookback window (current year included), that year's post-tax profit goes to an ordinary reserve and cannot enter the liquidation reserve; earlier amounts keep their regime (`p3.*`) | the definition of client and of 'almost exclusively'; the window; the grandfathering of existing reserves (yes) |
+
+**Client concentration is not data.** Owners are simulated with a mean largest-client share of 100% (exactly one client: S1), 95, 90, 80, 70 or 50%, with assumed fluctuation (sd 8 points, persistence 0.5, five years of history before 2026; `asm.client_share_*`). Results are reported by concentration; the share of S0 owners at each level is the open input "single director and one client".
+
+The owner can respond by hiring (P1), by raising director pay (P2: fixed-pay strategies 60k/80k/100k), or by switching strategy (all); an owner can also dip below the P3 threshold by adding a small client - **not modelled**.
+
+New open inputs created by comparison B (to add to section G): the employee test and the cost of the cheapest qualifying hire (P1); payroll period, treatment of excess and of old reserves (P2); the client definition, window and grandfathering (P3); the distribution of mean client concentration, director pay and retained profits among S0 owners.

@@ -51,6 +51,8 @@ class Outcome:
     equity_pre_exit: np.ndarray | None = None
     liquidity_gap: np.ndarray | None = None  # years' spending need not met by current-year income (before private savings)
     reduced_rate_years: np.ndarray | None = None
+    tax_year_total: list[np.ndarray] = field(default_factory=list)   # per calendar year, all taxes and contributions
+    tax_year_ssc: list[np.ndarray] = field(default_factory=list)     # of which social contributions
     private_path: list[np.ndarray] = field(default_factory=list)
     equity_path: list[np.ndarray] = field(default_factory=list)
     ledger_residual: float = 0.0
@@ -102,6 +104,8 @@ def simulate_employee(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Hou
             out.taxes[k] = out.taxes[k] + v
         rhs = sum(taxes_t.values()) + need + (wp_new - wp)
         out.ledger_residual = max(out.ledger_residual, float(np.max(np.abs(cost + gi - rhs))))
+        out.tax_year_total.append(sum(taxes_t.values()))
+        out.tax_year_ssc.append(ee + er)
         out.pension_base += wage
         out.owner_pay += wage
         out.liquidity_gap += np.clip(need - net, 0.0, None)
@@ -131,6 +135,8 @@ def simulate_sole_trader(Y: np.ndarray, years: list[int], path: PolicyPath, hh: 
             out.taxes[k] = out.taxes[k] + v
         rhs = admin + sum(taxes_t.values()) + need + (wp_new - wp)
         out.ledger_residual = max(out.ledger_residual, float(np.max(np.abs(Y[t] + gi - rhs))))
+        out.tax_year_total.append(sum(taxes_t.values()))
+        out.tax_year_ssc.append(ssc)
         out.admin += admin
         out.pension_base += profit - ssc
         out.owner_pay += profit

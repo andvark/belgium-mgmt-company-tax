@@ -35,3 +35,17 @@ def paired_shocks(seed: int, n_rep: int, years: list[int], pol: Policy) -> tuple
     # variance reduction: rescale so the replicate mean is exactly 1 in every year, so that sampling noise in expected revenue
     # cannot masquerade as an advantage of one arrangement (differences across replicates are untouched)
     return m_emp / m_emp.mean(axis=1, keepdims=True), m_bus / m_bus.mean(axis=1, keepdims=True)
+
+
+def client_share_paths(seed: int, n_rep: int, first_year: int, last_year: int, mean_share: float, pol: Policy) -> np.ndarray:
+    """Largest-client share by calendar year, shape (years, n_rep).  mean_share = 1.0 means exactly one client in every year (segment S1);
+    lower values fluctuate around the mean with AR(1) noise (assumed sd/rho) and are clipped to [0, 1].  Draws are keyed by
+    (seed, stream, year, replicate) so they are the same in every scenario."""
+    ids = np.arange(n_rep)
+    sd, rho = pol.v("asm.client_share_sd"), pol.v("asm.client_share_rho")
+    u = sd / np.sqrt(1 - rho**2) * crn.normal(seed, "client_init", 0, ids)
+    out = []
+    for yr in range(first_year, last_year + 1):
+        u = rho * u + sd * crn.normal(seed, "client", yr, ids)
+        out.append(np.ones(n_rep) if mean_share >= 1.0 else np.clip(mean_share + u, 0.0, 1.0))
+    return np.array(out)

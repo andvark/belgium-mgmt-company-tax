@@ -11,7 +11,7 @@ from mgmt_tax.policy import PolicyPath, load_policy  # noqa: E402
 
 @pytest.fixture()
 def pol():
-    return load_policy(ROOT / "configs" / "policy_be_2026_supplied.yaml", ROOT / "configs" / "assumptions.yaml")
+    return load_policy(ROOT / "configs" / "policy_be_2026_supplied.yaml", ROOT / "configs" / "assumptions.yaml", ROOT / "configs" / "proposals.yaml")
 
 
 @pytest.fixture()

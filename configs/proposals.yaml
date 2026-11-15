@@ -1,0 +1,32 @@
+# Switches and parameters for the three draft proposals.  ALL are scenario assumptions, never "the proposal":
+# the draft text was not available; P2 (2x/3x) and P3 (client threshold, lookback) come from second-hand excerpts (Reddit reposts of
+# a draft excerpt and press reports).  All switches are OFF in the baseline; a PolicyPath turns them on from a calendar year.
+name: proposals_scenario_switches
+policy_year: 2026
+banner: "DRAFT PROPOSALS ARE NOT LAW; parameters below are scenario assumptions"
+rules:
+  p1.reduced_rate_requires_employee:
+    value: false
+    status: scenario
+    source: "P1: 20% -> 25% on the first EUR 100,000 for companies without employees (rate change supplied by owner; the employee test - hours, months, relatives, flexi-jobs - is UNKNOWN). Modelled as: the reduced rate also requires the company to have a paid employee, i.e. a hire at employer cost c per year"
+    hand_check: true
+  p2.payroll_multiple:
+    value: null
+    status: scenario
+    source: "P2: total director + employee remuneration of m x the dividend (m = 2 or 3 reported as negotiating options; Reddit-sourced). null = off. Modelled as: reduced-regime dividends AND liquidation-reserve allocations in a year are capped at that year's payroll / m; amounts above the cap are taxed at the ordinary 30% (dividends) or stay in the free reserve (allocations). The cap applies to every reduced-regime payment from the start year, old reserves included. Payroll = director pay + employee gross wage, same calendar year"
+    hand_check: true
+  p3.active:
+    value: false
+    status: scenario
+    source: "P3: reduced dividend regimes (VVPRbis, liquidation reserve) withdrawn for single-director companies working almost exclusively for one client for several years, for NEW amounts from the start year. Modelled as: in a year when the owner's largest-client share was >= threshold in every year of the lookback window (current year included), the post-tax profit of that year goes to the ordinary reserve and cannot be allocated to the liquidation reserve; older amounts keep their regime"
+    hand_check: true
+  p3.client_threshold:
+    value: 0.9
+    status: scenario
+    source: "90% appeared in a report of a later negotiating version about companies without staff, reached only through a repost; grid 70-100% is run"
+    hand_check: true
+  p3.lookback_years:
+    value: 3
+    status: scenario
+    source: "'several years': grid 3 and 5"
+    hand_check: true

@@ -49,3 +49,14 @@ class ReserveAccount:
         out = self.total()
         self.vintages.clear()
         return out
+
+    def take_up_to(self, year: int, pol: Policy, limit: np.ndarray) -> np.ndarray:
+        """Remove and return up to ``limit`` of the amounts past the lock, oldest vintage first."""
+        left = np.broadcast_to(np.asarray(limit, dtype=float), self.shape).copy()
+        out = np.zeros(self.shape)
+        for v in self.eligible_years(year, pol):
+            take = np.minimum(self.vintages[v], np.clip(left, 0.0, None))
+            self.vintages[v] = self.vintages[v] - take
+            out = out + take
+            left = left - take
+        return out

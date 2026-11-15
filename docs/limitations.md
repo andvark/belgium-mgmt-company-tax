@@ -44,6 +44,15 @@ Stated up front so that no result is read as more than it is.
 29. **No indexation** of thresholds over 2026-2040; constant 2026 euros.
 30. **Stylised shocks** (sizes taken from `belgium_abm`, assumed) and stylised household spending needs; none is data.
 
+## Added with comparison B (15 November 2026)
+
+31. **The proposals are modelled from second-hand descriptions.** The mechanics of P1 (employee test, hire cost), P2 (payroll definition, treatment of excess, old reserves) and P3 (client definition, window, grandfathering) are my choices; the results show what these specific scenarios do, not what the draft does.
+32. **Client concentration is not data.** P3 results are reported by assumed owner concentration with an assumed fluctuation process; the distribution of concentration in S0 is unknown. A one-client owner is always caught; everything else depends on that unknown distribution.
+33. **Owner responses are limited to strategy, pay level and a hire.** No diversification of clients, restructuring, relocation, change of arrangement, entry or exit; the strategy set is fixed.
+34. **Per-owner tax effects are not a budget.** They are for archetype owners; the budget needs the mixture of owner types (open), and the 2040 liquidation in each simulated path is a horizon artefact that dominates late-year effects of P2 and P3.
+35. **Timing.** Static revenue effects of P2 and P3 can be negative in the early years for owners on the liquidation-reserve route and positive later; comparing with the government's EUR 300m / 450m profile requires the owner mix and a population model.
+36. **A hire is treated as a cost that leaves the system**; the taxes and contributions on the hire's wage are not counted, which understates revenue under P1 for owners who hire.
+
 ## What the study can credibly claim
 
 - the size and structure of the current tax advantage by profit level and household type under the verified rules;
