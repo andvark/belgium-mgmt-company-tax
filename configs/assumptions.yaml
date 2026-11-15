@@ -1,0 +1,39 @@
+# Non-statutory inputs for the comparison.  Every value is an ASSUMPTION (status: assumed), not data.
+# Most are taken from the stylised belgium_abm economy file (configs/economy_stylised.yaml there) so that the two repos agree;
+# household spending needs are placeholders.  None of these may be quoted as a Belgian fact.
+name: assumptions_v1
+policy_year: 2026
+banner: "NON-STATUTORY ASSUMPTIONS (stylised); not data."
+rules:
+  asm.admin_cost_sole_trader:
+    {value: 1000, status: assumed, source: "belgium_abm economy_stylised.yaml sole_prop_accounting_cost", hand_check: false}
+  asm.admin_cost_bv:
+    {value: 4000, status: assumed, source: "belgium_abm economy_stylised.yaml bv_accounting_cost", hand_check: false}
+  asm.bv_paid_up_capital:
+    {value: 12000, status: assumed, source: "belgium_abm economy_stylised.yaml bv_capital_contribution; returned untaxed on liquidation", hand_check: false}
+  asm.wage_shock_sigma:
+    {value: 0.08, status: assumed, source: "belgium_abm economy_stylised.yaml wage_shock_sigma", hand_check: false}
+  asm.wage_shock_rho:
+    {value: 0.9, status: assumed, source: "belgium_abm economy_stylised.yaml wage_shock_rho", hand_check: false}
+  asm.business_shock_sigma:
+    {value: 0.25, status: assumed, source: "belgium_abm economy_stylised.yaml business_shock_sigma", hand_check: false}
+  asm.business_shock_rho:
+    {value: 0.6, status: assumed, source: "belgium_abm economy_stylised.yaml business_shock_rho", hand_check: false}
+  asm.real_return:
+    {value: 0.0, status: assumed, source: "pre-tax real return on retained funds, same in company and privately; 0 isolates pure rate arbitrage; swept 0-3%", hand_check: false}
+  asm.private_return_tax:
+    {value: 0.30, status: assumed, source: "tax on private interest/return; the movable-income rate was NOT supplied (30% is a placeholder, irrelevant when real_return = 0)", hand_check: true}
+  asm.need_first_adult:
+    {value: 24000, status: assumed, source: "placeholder annual household spending of the owner (first adult), EUR", hand_check: false}
+  asm.need_second_adult:
+    {value: 12000, status: assumed, source: "placeholder additional spending for a partner, EUR", hand_check: false}
+  asm.need_per_child:
+    {value: 6000, status: assumed, source: "placeholder spending per child, EUR", hand_check: false}
+  asm.partner_net_income_employed:
+    {value: 30000, status: assumed, source: "placeholder net income of an employed partner, held fixed (individual taxation: does not change the owner's tax)", hand_check: false}
+  asm.vvprbis_eligible:
+    {value: true, status: assumed, source: "owner's shares qualify for the VVPRbis rate (conditions not supplied)", hand_check: true}
+  asm.start_year:
+    {value: 2026, status: assumed, source: "first year of the horizon", hand_check: false}
+  asm.end_year:
+    {value: 2040, status: assumed, source: "last year of the horizon (decision of the project owner: 2026-2040)", hand_check: false}

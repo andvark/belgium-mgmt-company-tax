@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mgmt-tax"
+version = "0.1.0"
+description = "Tax engine and comparisons for Belgian one-person management companies (employee vs sole trader vs BV)."
+requires-python = ">=3.12"
+# belgium_abm (andvark/belgium_abm, branch claude/statbel-data-integration-maq0e5) is a sibling dependency used for its
+# common-random-number module; it is not on PyPI: install it first with `pip install -e <path-to-belgium_abm>`.
+dependencies = ["numpy>=2.0", "pandas>=2.2", "pyyaml>=6"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mgmt_tax"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+  "unconfirmed: test depends on a rule whose status is not 'checked' (all rules are currently supplied/interpretation/open)",
+]
