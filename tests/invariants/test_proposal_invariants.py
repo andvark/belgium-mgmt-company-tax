@@ -86,3 +86,23 @@ def test_pay_cap_vanishes_when_payroll_is_large(pol):
     k = "BV:fx100_dist_vvpr"
     # at revenue 50,000 profit is below the pay anyway (pay capped at profit, no dividends): identical
     assert np.allclose(base[k].wealth_end[0], scn[k].wealth_end[0])
+
+
+def test_one_client_owner_result_is_independent_of_p3_and_combined_parameters(pol):
+    """Why one-client runs are done once per family: for an owner with exactly one client P3 binds every year whatever the threshold and lookback,
+    and P2 is moot once the reduced regimes are gone, so every P3 / combined setting must give the same result for every strategy."""
+    ref = wealth(pol, (p3(0.9, 3),), conc=1.0)
+    for ch in (p3(0.7, 5), p3(1.0, 3), p3(1.0, 5), p3(0.8, 3)):
+        o = wealth(pol, (ch,), conc=1.0)
+        for k in ref:
+            assert np.array_equal(ref[k].wealth_end, o[k].wealth_end), (ch.label, k)
+    # Combined: identical for every strategy EXCEPT those that keep grandfathered (pre-2028) reserves and pay them out as dividends later
+    # ('ret_vvpr', 'lr_div'): the P2 multiple still caps those dividends, so m matters for them (and for the anti-abuse variants, which are sensitivities).
+    # The report copies the one-client combined results only for BV_BEST, BV_STATIC and the archetypes, none of which is in that group.
+    skip = ("ret_vvpr", "lr_div", "antiabuse")
+    comb_ref = wealth(pol, (p1(2027), p2(2), p3(0.9, 3)), conc=1.0)
+    for m, ch in ((3, p3(0.7, 3)), (2, p3(1.0, 5)), (3, p3(0.9, 5))):
+        o = wealth(pol, (p1(2027), p2(m), ch), conc=1.0)
+        for k in comb_ref:
+            if not any(x in k for x in skip):
+                assert np.allclose(comb_ref[k].wealth_end, o[k].wealth_end, atol=1e-6), (m, ch.label, k)

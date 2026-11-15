@@ -10,8 +10,6 @@ asm.client_share_sd,0.08,assumed,False,"year-to-year fluctuation (sd, share poin
 asm.end_year,2040,assumed,False,last year of the horizon (decision of the project owner: 2026-2040),baseline
 asm.need_first_adult,24000,assumed,False,"placeholder annual household spending of the owner (first adult), EUR",baseline
 asm.need_per_child,6000,assumed,False,"placeholder spending per child, EUR",baseline
-asm.need_second_adult,12000,assumed,False,"placeholder additional spending for a partner, EUR",baseline
-asm.partner_net_income_employed,30000,assumed,False,"placeholder net income of an employed partner, held fixed (individual taxation: does not change the owner's tax)",baseline
 asm.private_return_tax,0.3,assumed,True,"tax on private interest/return; the movable-income rate was NOT supplied (30% is a placeholder, irrelevant when real_return = 0)",baseline
 asm.real_return,0.0,assumed,False,"pre-tax real return on retained funds, same in company and privately; 0 isolates pure rate arbitrage; swept 0-3%",baseline
 asm.start_year,2026,assumed,False,first year of the horizon,baseline
@@ -55,6 +53,8 @@ se.rate_2,0.1416,supplied,True,INASTI/RSVZ (via project owner),baseline
 se.rate_above_ceiling_2,0.0,open,True,treatment above the second ceiling not supplied; DEFAULT = no further contribution,baseline
 ssc.employee_rate,0.1307,supplied,True,ONSS/RSZ (via project owner); URL returned 404 from our session,baseline
 ssc.employer_rate,0.25,supplied,True,ONSS/RSZ private for-profit benchmark (via project owner),baseline
+asm.need_second_adult,12000,assumed,False,"placeholder additional spending for a partner, EUR",baseline
+asm.partner_net_income_employed,30000,assumed,False,"placeholder net income of an employed partner, held fixed (individual taxation: does not change the owner's tax)",baseline
 p1.reduced_rate_requires_employee,True,scenario,True,"scenario override 'P1' of: P1: 20% -> 25% on the first EUR 100,000 for companies without employees (rate change supplied by owner; the employee test - hours, months, relatives, flexi-jobs - is UNKNOWN). Modelled as: the reduced rate also requires the company to have a paid employee, i.e. a hire at employer cost c per year",P1_2027
 p2.payroll_multiple,2,scenario,True,"scenario override 'P2x2' of: P2: total director + employee remuneration of m x the dividend (m = 2 or 3 reported as negotiating options; Reddit-sourced). null = off. Modelled as: reduced-regime dividends AND liquidation-reserve allocations in a year are capped at that year's payroll / m; amounts above the cap are taxed at the ordinary 30% (dividends) or stay in the free reserve (allocations). The cap applies to every reduced-regime payment from the start year, old reserves included. Payroll = director pay + employee gross wage, same calendar year",P2x2_2028
 p2.payroll_multiple,3,scenario,True,"scenario override 'P2x3' of: P2: total director + employee remuneration of m x the dividend (m = 2 or 3 reported as negotiating options; Reddit-sourced). null = off. Modelled as: reduced-regime dividends AND liquidation-reserve allocations in a year are capped at that year's payroll / m; amounts above the cap are taxed at the ordinary 30% (dividends) or stay in the free reserve (allocations). The cap applies to every reduced-regime payment from the start year, old reserves included. Payroll = director pay + employee gross wage, same calendar year",P2x3_2028

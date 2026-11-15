@@ -20,9 +20,11 @@
     "couple_two_earners_2kids"
   ],
   "n_strategies": 28,
-  "git_commit": "af36484",
+  "git_commit": "7bb9148",
   "max_ledger_residual": 1.3969838619232178e-09,
   "n_scenarios": 25,
+  "n_runs": 101,
+  "n_simulations": 303,
   "rule_status_counts": {
     "supplied": 22,
     "assumed": 19,

@@ -49,11 +49,16 @@ class Scenario:
         return min(starts) if starts else 0
 
 
-# hire_cost 0 = no employee; 1 = a hire at (almost) zero cost, used to locate the break-even hire cost; the others are annual employer costs in EUR (scenario sweep)
-HIRES = (0.0, 1.0, 5000.0, 10000.0, 15000.0, 20000.0)
-HIRES_COMB = (0.0, 5000.0, 10000.0, 20000.0)
-CONCS = (1.0, 0.95, 0.90, 0.80, 0.70, 0.50)  # mean share of the largest client; 1.0 = exactly one client (segment S1)
-CONCS_COMB = (1.0, 0.90, 0.70)
+# hire_cost 0 = no employee; 1 = a hire at (almost) zero cost, used to locate the break-even hire cost; the others are annual employer costs in EUR (scenario sweep).
+# Only a hire at 5,000 is ever chosen over no hire in the earlier full grid; 10,000 and 20,000 are kept for the P1 sweep, 15,000 was dropped (never chosen, interpolated).
+HIRES = (0.0, 1.0, 5000.0, 10000.0, 20000.0)
+HIRES_COMB = (0.0, 5000.0)
+CONCS = (0.95, 0.90, 0.80, 0.70, 0.50)   # mean share of the largest client; 1.0 (exactly one client, S1) is run once, see REF_ONE_CLIENT
+CONCS_COMB = (0.90, 0.70)
+# For an owner with exactly one client P3 binds in every year whatever threshold and lookback, and P2 is moot once the reduced regimes are gone, so every
+# P3 and combined setting gives the same result (verified exactly in the full 185-run grid and by tests/invariants).  It is therefore run for ONE reference
+# scenario of each family and copied to the others in the report.
+REF_ONE_CLIENT = {"P3": "P3_90pct_3y", "combined": "COMB_P1_P2x2_P3_90pct_3y"}
 
 
 def p1(start=2027):
@@ -76,12 +81,20 @@ def scenario_list() -> list[Scenario]:
     for thr in (0.7, 0.8, 0.9, 1.0):
         for look in (3, 5):
             ch = p3(thr, look)
-            sc.append(Scenario(ch.label, "P3", (ch,), (0.0,), CONCS, (("threshold", thr), ("lookback", look))))
+            concs = ((1.0,) if ch.label == REF_ONE_CLIENT["P3"] else ()) + CONCS
+            sc.append(Scenario(ch.label, "P3", (ch,), (0.0,), concs, (("threshold", thr), ("lookback", look))))
     for m in (2, 3):
         for thr, look in ((0.7, 3), (0.9, 3), (0.9, 5), (1.0, 3), (1.0, 5)):
             ch3 = p3(thr, look)
-            sc.append(Scenario(f"COMB_P1_P2x{m}_{ch3.label}", "combined", (p1(2027), p2(m), ch3), HIRES_COMB, CONCS_COMB, (("m", m), ("threshold", thr), ("lookback", look))))
+            label = f"COMB_P1_P2x{m}_{ch3.label}"
+            ref = label == REF_ONE_CLIENT["combined"]
+            sc.append(Scenario(label, "combined", (p1(2027), p2(m), ch3), (0.0, 5000.0, 10000.0) if ref else HIRES_COMB,
+                               ((1.0,) if ref else ()) + CONCS_COMB, (("m", m), ("threshold", thr), ("lookback", look))))
     return sc
+
+
+def n_runs() -> int:
+    return sum(len(s.hire_costs) * len(s.concentrations) for s in scenario_list())
 
 
 def run_one(path: PolicyPath, hh: Household, first_period: int, n_rep: int, seed: int, profits, strats, hire_cost: float, conc: float, hire_from: int = 0) -> tuple[dict[str, Outcome], list[int]]:
