@@ -1,0 +1,52 @@
+# Registry of datasets needed for the management-company study. Nothing is acquired yet.
+# status: not_acquired | candidate | acquired ; every value in the study must trace to an entry or to a verified rule.
+
+- id: rules_primary_sources
+  need: verified tax, contribution and dividend rules (2026 and draft), thresholds, dates
+  source: FPS Finance; INASTI/RSVZ; RSZ/ONSS; Moniteur belge
+  status: not_acquired
+  notes: partly supplied by the project owner in docs/rules_inputs.md; unverified; includes conflicting allowance figures
+- id: zero_employee_bv_counts
+  need: number of zero-employee BVs, single-director share, creations and closures
+  source: Crossroads Bank for Enterprises (KBO/BCE); Statbel enterprise demography; FPS Finance
+  status: candidate
+  notes: scale hints only (Eurostat bd_size: 729,925 zero-employee enterprises all forms); a claim of more than 80,000 management companies is unverified
+- id: nbb_small_company_accounts
+  need: remuneration, retained earnings, dividends, turnover of small companies (aggregates or bunching around the pay threshold)
+  source: National Bank of Belgium Central Balance Sheet Office
+  status: candidate
+- id: fps_finance_corporate_tax_statistics
+  need: distribution of taxable profit, use of the reduced rate, dividend withholding by regime
+  source: FPS Finance fiscal statistics
+  status: candidate
+- id: elasticity_literature
+  need: incorporation and income-shifting elasticities with page references
+  source: NBER (UK incorporation), CPB (European incorporation), Harju and Matikka (Finland), a Dutch owner-manager study, Ghent/NBB study if located
+  status: candidate
+  notes: papers must be read in full; ranges chosen and recorded
+- id: off_payroll_evidence
+  need: client and contractor responses to a tax or classification change
+  source: HMRC evaluation of the 2021 off-payroll reform (UK)
+  status: candidate
+- id: planning_bureau_budget_documents
+  need: macro assumptions and any scoring of the proposals; deficit path context
+  source: Federal Planning Bureau; Court of Audit; draft budget notes
+  status: candidate
+- id: self_employed_pension_statistics
+  need: statutory pension levels of the self-employed vs employees
+  source: FPS Pensions; INASTI
+  status: candidate
+- id: nbb_financial_accounts
+  need: household and corporate saving, investment of retained earnings (context for the capital-market limitation)
+  source: National Bank of Belgium
+  status: candidate
+- id: hfcs_2023_belgium
+  need: household wealth, share with business wealth (12.2% of households)
+  source: ECB HFCS wave 2023 aggregate tables
+  status: acquired
+  notes: already parsed in belgium_abm; microdata restricted and not available
+- id: eurostat_lfs_and_business_demography
+  need: self-employed without employees, enterprise births and deaths by legal form, zero-employee enterprise counts
+  source: Eurostat (lfsa_esgaed, bd_l_form, bd_size)
+  status: acquired
+  notes: pulled through the belgium_abm Eurostat client; reuse its cache
