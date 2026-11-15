@@ -1,0 +1,10 @@
+factor,low_label,low,high_label,high,dyn_low,dyn_high
+central mix,,513.427,,513.427,653.406,653.406
+median revenue,60k,245.412,130k,848.980,302.674,1105.381
+revenue spread (sigma),0.3,368.183,0.9,610.373,451.814,796.259
+share with one client (S1),10%,498.056,80%,533.922,628.275,686.913
+size of S0 (N0),250k,365.689,450k,658.239,465.389,837.699
+strategy mix,all ordinary dividends,491.773,all optimisers,-1022.799,477.604,-666.289
+household,single,513.427,"one earner, 2 children",789.074,653.406,860.210
+owners re-plan,keep planning,513.427,re-plan,432.996,653.406,580.208
+measure parameters,mild,507.707,harsh,534.623,646.570,687.424

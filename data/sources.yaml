@@ -41,7 +41,7 @@
   source: National Bank of Belgium
   status: candidate
 - id: hfcs_2023_belgium
-  need: household wealth, share with business wealth (12.2% of households)
+  need: household wealth, share with business wealth (12.2% of households); copy of the observed national aggregates (deciles, mean, Gini, top shares) in data/hfcs_wealth_targets_BE_2023.csv, used for the national-wealth bound
   source: ECB HFCS wave 2023 aggregate tables
   status: acquired
   notes: already parsed in belgium_abm; microdata restricted and not available
