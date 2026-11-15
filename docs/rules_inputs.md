@@ -1,6 +1,6 @@
 # Rule inputs
 
-Last updated 15 November 2026 after the project owner's reply.
+Last updated 15 November 2026 (WP1 engine built; engine defaults and interpretations recorded in section H).
 
 ## How to read the status column
 
@@ -9,7 +9,9 @@ Last updated 15 November 2026 after the project owner's reply.
 | **checked** | confirmed by me from a primary or official statistical source reachable from this session |
 | **supplied** | provided by the project owner with official citations (fin.belgium.be, ejustice, lachambre, socialsecurity.be); **the cited primary pages could not be opened from this session** (FPS Finance and FPS Economy pages return an anti-bot challenge; the ONSS URL returned 404), so I have not independently confirmed them |
 | **scenario** | a reported negotiating position, not law and not a published rule; modelled as an assumption and varied |
-| **open** | genuinely undecided or unavailable |
+| **open** | genuinely undecided or unavailable; where the engine needs a value, a DEFAULT was chosen and is listed in section H |
+| **interpretation** | the supplied wording is ambiguous; the engine uses *my reading* of it (section H) and the reading is flagged for confirmation |
+| **assumed** | non-statutory input of the comparison (costs, spending needs, shock sizes, returns); never a Belgian fact |
 
 The anti-bot challenge was not circumvented. Where a value drives a headline result, it should be confirmed by someone able to read the primary page (list in section F).
 
@@ -98,3 +100,33 @@ Government's projected revenue: EUR 300m (2027); EUR 450m a year (2028, 2029); m
 - the share of S0 with a single director and one client;
 - the distribution of director pay and retained profits in S0 (form 281.20 and NBB annual accounts give routes, no public distribution found);
 - the employee definition for P1.
+
+## H. How the engine uses these inputs (WP1, 15 November 2026)
+
+The machine-readable version is `configs/policy_be_2026_supplied.yaml` (rules) and `configs/assumptions.yaml` (assumptions); every value has an id, status and source, and `docs/hand_check_list.md` is generated from them. **No rule has status `checked`.**
+
+Defaults chosen for open inputs (agreed 15 November: "assumptions are ok"):
+
+| input | engine default | direction of bias if the default is wrong |
+|---|---|---|
+| employee professional-expense lump sum, work bonus, employer reductions | none (0) | understates the employee's net income, overstates the BV's edge over the employee |
+| self-employed contribution above the second ceiling | 0% | overstates income left to sole traders and BV owners above about EUR 131,000 gross |
+| self-employed contribution base | income net of the contribution itself (closed form), same for sole trader and director | affects both arrangements alike |
+| social-fund fees | 0 | small |
+| company annual contribution | EUR 409.30 (the lower of the two supplied amounts; the balance-sheet threshold was not supplied) | EUR 613 a year |
+| real return on retained funds | 0% (swept 0-3%) | at 0% the timing of extraction has no value |
+| tax on private returns | 30% placeholder, irrelevant at 0% return | - |
+| household spending needs | 24,000 + 12,000 partner + 6,000 per child; employed partner nets 30,000 | placeholders |
+
+Readings of ambiguous supplied wording (please confirm):
+
+1. **Liquidation reserve total on the dividend route.** The components (10% levy at creation, 9.8% withholding) imply 10% + 0.9 x 9.8% = **18.82%** if the withholding applies to the reserve net of the levy; the owner states "effective 18%". The engine uses the components; sensitivity case `lr_dividend_total_18pct` uses 18% exactly (effect on results is small).
+2. **Lock.** A reserve created in year v may be paid as a dividend from year v+3 (`lr.lock_extra_calendar_years` = 0). If the law counts from the end of the creation year plus three years, set it to 1 (sensitivity case `lock_plus_one_year`). The lock is not applied to payout on liquidation (supplied rule: no additional withholding on actual liquidation).
+3. **"Test starts in the fifth taxable period."** Read as: taxable periods 1-4 are exempt from the EUR 51,000 pay condition. Sensitivity case `no_exempt_first_periods`; results are reported separately for a mature company (period 5 or later in 2026) and a new one.
+4. **"Lower pay can qualify if it covers taxable profit."** Read as: the test is pay >= min(51,000, taxable profit before deducting the director's pay).
+5. **Anti-abuse rule.** The consequence was not supplied. Default: the payout is taxed as an ordinary 30% dividend and the levy is not refunded (`lr.anti_abuse_rate`). Reported as separate `*_antiabuse` strategy variants, not as a baseline.
+6. **Pension-relevant income** is reported (employee gross wage, net self-employed income, BV director pay net of contributions). No euro value is put on pensions.
+
+Not modelled and flagged: a possible dividend-vs-paid-up-capital condition on the 20% rate (the engine raises an error if switched on), VVPRbis eligibility conditions and any waiting period, benefits in kind, family tax rules, tax-advantaged private pension saving, indexation of thresholds, loss carry-forward.
+
+New items for section F (primary-source check): the two readings above, VVPRbis conditions, the dividend-vs-capital condition, the anti-abuse consequence.

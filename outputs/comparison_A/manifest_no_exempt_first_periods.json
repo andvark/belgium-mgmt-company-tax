@@ -1,0 +1,56 @@
+{
+  "label": "no_exempt_first_periods",
+  "n_rep": 300,
+  "seed": 20261115,
+  "profits": [
+    40000.0,
+    60000.0,
+    80000.0,
+    100000.0,
+    130000.0,
+    160000.0,
+    200000.0,
+    250000.0
+  ],
+  "households": [
+    {
+      "name": "single",
+      "adults": 1,
+      "children": 0,
+      "partner_employed": false
+    },
+    {
+      "name": "couple_one_earner",
+      "adults": 2,
+      "children": 0,
+      "partner_employed": false
+    },
+    {
+      "name": "couple_one_earner_2kids",
+      "adults": 2,
+      "children": 2,
+      "partner_employed": false
+    },
+    {
+      "name": "couple_two_earners_2kids",
+      "adults": 2,
+      "children": 2,
+      "partner_employed": true
+    }
+  ],
+  "cohorts": {
+    "mature": 5,
+    "new": 1
+  },
+  "banner": "RULES SUPPLIED BY THE PROJECT OWNER, NOT INDEPENDENTLY CONFIRMED AGAINST PRIMARY SOURCES. Draft proposals are not law. | NON-STATUTORY ASSUMPTIONS (stylised); not data. | PATH CHANGES: no_exempt_first_periods from 2026",
+  "git_commit": "aa20e74",
+  "max_ledger_residual": 1.1641532182693481e-09,
+  "n_rules_used": 50,
+  "rule_status_counts": {
+    "supplied": 22,
+    "assumed": 16,
+    "open": 9,
+    "interpretation": 2,
+    "scenario": 1
+  }
+}

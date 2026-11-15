@@ -34,6 +34,16 @@ Stated up front so that no result is read as more than it is.
 23. **Source quality for the draft:** P2 (2x/3x) and P3 (client threshold, lookback) rest on second-hand excerpts; results are labelled as scenarios and replaced once the draft text is available.
 22. **Policy status:** the proposals are drafts, parameters are open, and baseline rules may change before any result is published; every table states the policy version and date.
 
+## Added with comparison A (15 November 2026)
+
+24. **Perfect-foresight owners.** `BV_BEST` is the best of 19 fixed strategies by mean terminal wealth, evaluated with full knowledge of the rules. It is an upper bound on what a tax-minimising owner gets, not a description of owners.
+25. **Comparators are not optimised.** Sole traders and employees get no tax-advantaged private pension saving, third-pillar saving or other deductions, and the employee gets no professional-expense lump sum or work bonus (inputs not supplied). This overstates the BV advantage.
+26. **Household type acts only through liquidity.** Taxation is individual and family tax rules were not supplied; household results differ because the owner must finance more or less spending.
+27. **A real return of 0%** in the baseline means timing of extraction is worth nothing; the sensitivity cases with 2-3% show the effect.
+28. **Pension entitlements are not valued.** A large share of the BV's advantage is lower social contributions, which buy lower pension-relevant income.
+29. **No indexation** of thresholds over 2026-2040; constant 2026 euros.
+30. **Stylised shocks** (sizes taken from `belgium_abm`, assumed) and stylised household spending needs; none is data.
+
 ## What the study can credibly claim
 
 - the size and structure of the current tax advantage by profit level and household type under the verified rules;
