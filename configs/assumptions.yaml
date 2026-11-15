@@ -32,7 +32,7 @@ rules:
   asm.partner_net_income_employed:
     {value: 30000, status: assumed, source: "placeholder net income of an employed partner, held fixed (individual taxation: does not change the owner's tax)", hand_check: false}
   asm.vvprbis_eligible:
-    {value: true, status: assumed, source: "owner's shares qualify for the VVPRbis rate (conditions not supplied)", hand_check: true}
+    {value: true, status: assumed, source: "the owner's shares qualify for VVPRbis (new registered shares for fully paid new cash contributions, continuous full ownership, no preferential rights, small company at contribution); the conditions are stated in the checklist review but whether a given owner meets them is an assumption. The 3-year wait after the contribution year is modelled (vvprbis.wait_years_after_contribution_year)", hand_check: true}
   asm.start_year:
     {value: 2026, status: assumed, source: "first year of the horizon", hand_check: false}
   asm.end_year:

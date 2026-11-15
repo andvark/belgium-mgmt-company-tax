@@ -70,13 +70,15 @@ def test_p3_never_binds_for_an_owner_with_low_concentration(pol):
         assert np.array_equal(base[k].wealth_end, scn[k].wealth_end)
 
 
-def test_p1_hire_is_worthless_when_the_reduced_rate_is_already_lost(pol):
-    """A strategy that pays below EUR 51,000 never had the reduced rate (after the exempt periods), so P1 leaves it unchanged."""
+def test_p1_changes_nothing_where_the_reduced_rate_was_never_used(pol):
+    """Where a strategy never qualified for the 20% rate under current law (no year at the reduced rate), P1 cannot change its tax; and a company that
+    pays out all profit has no taxable profit, so P1 leaves it unchanged."""
     base = wealth(pol, (), first=5)
     scn = wealth(pol, (p1(2026),), first=5)
     for k in base:
-        if k.startswith("BV:min_") or k == "BV:shell_full_pay":
-            assert np.allclose(base[k].wealth_end, scn[k].wealth_end), k
+        mask = base[k].reduced_rate_years == 0
+        assert np.allclose(base[k].wealth_end[mask], scn[k].wealth_end[mask]), k
+    assert np.allclose(base["BV:shell_full_pay"].wealth_end, scn["BV:shell_full_pay"].wealth_end)
 
 
 def test_pay_cap_vanishes_when_payroll_is_large(pol):

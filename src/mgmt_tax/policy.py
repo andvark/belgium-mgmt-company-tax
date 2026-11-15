@@ -15,8 +15,8 @@ from typing import Any
 import pandas as pd
 import yaml
 
-STATUSES = ("checked", "supplied", "interpretation", "open", "assumed", "scenario")
-UNCONFIRMED = ("supplied", "interpretation", "open", "assumed", "scenario")  # everything except "checked"
+STATUSES = ("checked", "owner_confirmed", "supplied", "interpretation", "open", "assumed", "scenario")
+UNCONFIRMED = ("supplied", "interpretation", "open", "assumed", "scenario")  # everything except "checked" and "owner_confirmed"
 
 
 @dataclass(frozen=True)

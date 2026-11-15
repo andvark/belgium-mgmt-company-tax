@@ -20,17 +20,17 @@
     "couple_two_earners_2kids"
   ],
   "n_strategies": 28,
-  "git_commit": "7bb9148",
-  "max_ledger_residual": 1.3969838619232178e-09,
+  "git_commit": "3ba8db0",
+  "max_ledger_residual": 1.280568540096283e-09,
   "n_scenarios": 25,
   "n_runs": 101,
   "n_simulations": 303,
   "rule_status_counts": {
-    "supplied": 22,
+    "owner_confirmed": 30,
     "assumed": 19,
-    "open": 9,
     "scenario": 5,
-    "interpretation": 3
+    "open": 4,
+    "supplied": 1
   },
   "banner": "RULES SUPPLIED, NOT CONFIRMED; PROPOSAL PARAMETERS ARE SCENARIO ASSUMPTIONS, NOT THE DRAFT"
 }

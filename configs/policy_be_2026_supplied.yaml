@@ -3,6 +3,8 @@
 # could not be opened from the research sessions (anti-bot challenge / 404).  Nothing here is "checked".
 #
 # status:
+#   owner_confirmed value reported CONFIRMED against primary sources in the project owner's checklist review of 15 Nov 2026 (citations in the source field);
+#                   this analysis has still not opened the primary pages itself
 #   supplied        value given by the owner with an official citation; primary page not confirmed by us
 #   interpretation  wording supplied by the owner is ambiguous; value is OUR READING of it (see note)
 #   open            input genuinely missing; value is a DEFAULT chosen so that the engine can run (see note)
@@ -10,91 +12,92 @@
 # hand_check: true = please confirm against the primary source (listed in docs/hand_check_list.md)
 name: be_2026_supplied
 policy_year: 2026
-banner: "RULES SUPPLIED BY THE PROJECT OWNER, NOT INDEPENDENTLY CONFIRMED AGAINST PRIMARY SOURCES. Draft proposals are not law."
+banner: "RULES SUPPLIED BY THE PROJECT OWNER; MOST WERE REPORTED CONFIRMED AGAINST PRIMARY SOURCES IN THE OWNER'S CHECKLIST REVIEW OF 15 NOV 2026 (this analysis has not opened the primary pages itself); the remaining open inputs are in hand_check_list.md. Draft proposals are not law."
 rules:
   # ---------------------------------------------------------------- personal income tax
   pit.brackets:
     value: [[16720, 0.25], [29510, 0.40], [51070, 0.45], [null, 0.50]]
-    status: supplied
-    source: "fin.belgium.be personal income tax rates, income 2026 (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "FPS Finance personal income tax rates, income 2026: 25/40/45/50% with cutoffs 16,720 / 29,510 / 51,070 (confirmed in owner checklist review)"
+    hand_check: false
   pit.basic_allowance:
     value: 11550
-    status: supplied
-    source: "fin.belgium.be, income earned 2026 / assessment year 2027 (EUR 10,910 for income 2025)"
-    hand_check: true
+    status: owner_confirmed
+    source: "FPS Finance: EUR 11,550 for income 2026 / assessment year 2027 (confirmed in owner checklist review)"
+    hand_check: false
   pit.reduction_rate:
     value: 0.25
-    status: supplied
-    source: "tax-free allowance applied as 25% reduction of tax after brackets = EUR 2,887.50 (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "basic allowance gives a EUR 2,887.50 reduction in the basic calculation (confirmed in owner checklist review)"
+    hand_check: false
   pit.municipal_surcharge:
     value: 0.072
     status: supplied
-    source: "Statbel viz, weighted national average, assessment year 2024 (via project owner); varies by municipality"
+    source: "Statbel viz, weighted national average, assessment year 2024 (via project owner). Checklist review: municipal rates vary; the published schedule was verified but the 7.2% weighted average could NOT be reproduced"
     hand_check: true
   # ---------------------------------------------------------------- employee comparator
   ssc.employee_rate:
     value: 0.1307
-    status: supplied
-    source: "ONSS/RSZ (via project owner); URL returned 404 from our session"
-    hand_check: true
+    status: owner_confirmed
+    source: "ONSS/RSZ ordinary private for-profit benchmark 13.07% (confirmed in owner checklist review)"
+    hand_check: false
   ssc.employer_rate:
     value: 0.25
-    status: supplied
-    source: "ONSS/RSZ private for-profit benchmark (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "ONSS/RSZ ordinary private for-profit benchmark 25% (confirmed in owner checklist review)"
+    hand_check: false
   emp.professional_expense_rate:
-    value: 0.0
-    status: open
-    source: "employee professional-expense lump sum not supplied; DEFAULT = none (understates employee net income)"
-    hand_check: true
-    note: "the real lump sum would lower the employee's tax; switching it off biases comparison A in favour of the BV"
+    value: 0.30
+    status: owner_confirmed
+    source: "statutory lump sum: 30% of gross wage after deductible employee contributions (CIR 92 art. 51; confirmed in owner checklist review). Replaces the earlier default of zero"
+    hand_check: false
+    note: "applied to wage minus employee contributions; the earlier default of zero understated employee take-home pay"
   emp.professional_expense_cap:
-    value: 0.0
-    status: open
-    source: "not supplied; default none"
-    hand_check: true
+    value: 6070.0
+    status: owner_confirmed
+    source: "cap EUR 6,070 for income 2026 (official indexation notice; confirmed in owner checklist review)"
+    hand_check: false
   emp.employer_reductions_and_work_bonus:
     value: 0.0
     status: open
-    source: "employer reductions / work bonus not supplied; default none (EUR per year, subtracted from employer cost)"
+    source: "employer reductions and the low-wage work bonus are separate from the lump sum and remain NOT modelled (default none; irrelevant for wages above the work-bonus range)"
     hand_check: true
   # ---------------------------------------------------------------- self-employed contributions (main occupation)
   se.rate_1:
     value: 0.205
-    status: supplied
-    source: "INASTI/RSVZ (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "INASTI 2026 schedule: 20.50% through EUR 75,024.54, main occupation (confirmed in owner checklist review)"
+    hand_check: false
   se.ceiling_1:
     value: 75024.54
-    status: supplied
-    source: "INASTI/RSVZ (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "INASTI 2026 schedule (confirmed in owner checklist review)"
+    hand_check: false
   se.rate_2:
     value: 0.1416
-    status: supplied
-    source: "INASTI/RSVZ (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "INASTI 2026 schedule: 14.16% on the next slice (confirmed in owner checklist review)"
+    hand_check: false
   se.ceiling_2:
     value: 110562.42
-    status: supplied
-    source: "INASTI/RSVZ (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "INASTI 2026 schedule: EUR 110,562.42 (confirmed in owner checklist review)"
+    hand_check: false
   se.rate_above_ceiling_2:
     value: 0.0
-    status: open
-    source: "treatment above the second ceiling not supplied; DEFAULT = no further contribution"
-    hand_check: true
+    status: owner_confirmed
+    source: "marginal rate above EUR 110,562.42 is zero (maximum EUR 5,103.05 a quarter; confirmed in owner checklist review)"
+    hand_check: false
+    note: "the default of 0 is now confirmed"
   se.min_quarterly:
     value: 890.42
-    status: supplied
-    source: "INASTI/RSVZ minimum quarterly contribution before fund fees (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "INASTI 2026: standard minimum EUR 890.42 a quarter, before fund fees (confirmed in owner checklist review)"
+    hand_check: false
   se.base_net_of_contribution:
     value: true
     status: open
-    source: "OUR MODELLING CHOICE: contribution computed on income net of the contribution itself (closed-form gross-up); applied identically to sole trader and director"
+    source: "MODELLING CHOICE, a steady-state approximation: the ceilings apply to net taxable income reflecting deductible contributions actually paid in the income year; the model equates those payments with the final liability of the same year (provisional payments and regularisations can differ)"
     hand_check: true
   se.admin_fee_rate:
     value: 0.0
@@ -104,88 +107,97 @@ rules:
   # ---------------------------------------------------------------- company level
   corp.standard_rate:
     value: 0.25
-    status: supplied
-    source: "corporate tax standard rate (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "corporate tax 25% standard (confirmed in owner checklist review)"
+    hand_check: false
   corp.reduced_rate:
     value: 0.20
-    status: supplied
-    source: "reduced rate on first EUR 100,000 for qualifying small companies (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "20% on the first EUR 100,000 for qualifying small companies (confirmed in owner checklist review)"
+    hand_check: false
   corp.reduced_band:
     value: 100000
-    status: supplied
-    source: "first EUR 100,000 of taxable profit (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "first EUR 100,000 of taxable profit (confirmed in owner checklist review)"
+    hand_check: false
   corp.director_min_pay:
     value: 51000
-    status: supplied
-    source: "director remuneration >= EUR 51,000 (indexed from 45,000), calendar-year company (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "EUR 51,000, indexed threshold for assessment year 2027 (July 2026 law art. 80, August indexation notice; confirmed in owner checklist review)"
+    hand_check: false
   corp.pay_test_covers_profit:
     value: true
-    status: interpretation
-    source: "'lower pay can qualify if it covers taxable profit'. READING: condition is pay >= min(51,000, taxable profit BEFORE deducting the director's pay)"
-    hand_check: true
+    status: owner_confirmed
+    source: "below EUR 51,000, director pay must at least equal the company's taxable income AFTER deducting that pay (CIR 92 art. 145/26; confirmed in owner checklist review). Example: EUR 60,000 before pay and pay 30,000 leaves 30,000 taxable and qualifies. This corrects the earlier reading, which tested pay against profit BEFORE pay"
+    hand_check: false
+    note: "qualifies if pay >= 51,000 or pay >= profit before pay - pay; cheapest qualifying pay = min(51,000, profit before pay / 2)"
   corp.pay_test_first_exempt_periods:
     value: 4
-    status: interpretation
-    source: "'test starts in the fifth taxable period'. READING: taxable periods 1-4 are exempt from the pay condition"
-    hand_check: true
+    status: owner_confirmed
+    source: "taxable periods 1-4 are exempt from the remuneration test (confirmed in owner checklist review; a continuation of an existing activity can inherit an earlier deemed start date, not modelled)"
+    hand_check: false
   corp.dividend_capital_condition:
     value: false
-    status: open
-    source: "possible condition tying the reduced rate to dividends vs paid-up capital (maybe 13%): NOT in the supplied rules, NOT modelled (the engine raises if this is set to true); owner to check"
-    hand_check: true
+    status: owner_confirmed
+    source: "the old 13% dividend-to-paid-up-capital limit was repealed by the 2017 corporate-tax reform (art. 54); confirmed in owner checklist review. A separate rule from assessment year 2027 can deny the reduced rate when flat-valued benefits in kind exceed 20% of total director remuneration (not modelled)"
+    hand_check: false
+    note: "keep false"
   corp.annual_company_contribution:
     value: 409.30
-    status: open
-    source: "supplied as EUR 409.30 or 1,022.38 depending on 2024 balance-sheet total; the threshold was not supplied, so the lower amount is used"
-    hand_check: true
+    status: owner_confirmed
+    source: "EUR 409.30 for 2024 balance-sheet total up to EUR 879,163.44, EUR 1,022.38 above (INASTI; confirmed in owner checklist review). Qualifying start-ups can receive a three-year exemption (not modelled; EUR 409 a year)"
+    hand_check: false
   # ---------------------------------------------------------------- distributions
   div.ordinary_rate:
     value: 0.30
-    status: supplied
-    source: "ordinary dividend withholding (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "ordinary dividends 30% (confirmed in owner checklist review)"
+    hand_check: false
   div.vvprbis_rate:
     value: 0.18
-    status: supplied
-    source: "VVPRbis dividend, 18% since 1 July 2026 (was 15%) (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "18% for qualifying dividends attributed or paid from 1 July 2026 (CIR 92 art. 269 par. 2, 2026 programme law; confirmed in owner checklist review). Eligibility: see vvprbis.* and asm.vvprbis_eligible"
+    hand_check: false
   lr.levy_rate:
     value: 0.10
-    status: supplied
-    source: "liquidation reserve: 10% levy at creation (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "separate levy of 10% of the amount CREDITED to the reserve (confirmed in owner checklist review). From EUR 110 available after ordinary corporate tax: credit 100, pay 10 up front"
+    hand_check: false
   lr.dividend_withholding:
     value: 0.098
-    status: supplied
-    source: "liquidation reserve distributed as dividend after the wait: 9.8% withholding (via project owner)"
-    note: "INTERPRETATION of the total: reserve account = allocation minus 10% levy; 9.8% applies to what is distributed => 10% + 0.9 x 9.8% = 18.82%, whereas the owner states 'effective 18%'. Sensitivity: set to 0.08889 for a total of exactly 18%."
-    hand_check: true
+    status: owner_confirmed
+    source: "9.8% withholding on the qualifying dividend, applied to the credited amount; reserves constituted from 31 December 2025, effective 11 June 2026 (2026 programme law arts. 15-18; confirmed in owner checklist review). Total on the dividend route 19.80/110 = 18.00%; at liquidation 10/110 = 9.09%"
+    hand_check: false
+    note: "RESOLVED: the total is 18.00%, not 18.82%; reserve credited = available / 1.10"
   lr.lock_years:
     value: 3
-    status: supplied
-    source: "three-year wait before dividend distribution (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "three full years from the last day of the taxable period in which the reserve was constituted (2025 programme law art. 33; confirmed in owner checklist review)"
+    hand_check: false
   lr.lock_extra_calendar_years:
-    value: 0
-    status: interpretation
-    source: "READING: a reserve created in year v can be paid as dividend from year v+3. If the law counts from the END of the creation year plus three years, set to 1"
-    hand_check: true
+    value: 1
+    status: owner_confirmed
+    source: "for a 31 December 2026 close the first ordinary payment year at 9.8% is 2030, i.e. a calendar-year model that books the dividend in its payment year uses 1 (confirmed in owner checklist review). Early distributions of new vintages generally attract 30% (the model does not pay them early)"
+    hand_check: false
+    note: "was 0 (my earlier reading); date-based modelling could use actual dates"
   lr.liquidation_extra_withholding:
     value: 0.0
-    status: supplied
-    source: "qualifying liquidation reserve paid out on actual liquidation: levy already paid, no additional withholding (law of 30 May 2026, art. 13, via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "qualifying liquidation-reserve payouts on actual liquidation are exempt at payout, the levy having been paid (CIR 92 art. 269; confirmed in owner checklist review)"
+    hand_check: false
   lr.anti_abuse_rate:
     value: 0.30
     status: open
-    source: "2026 anti-abuse rule makes the payout taxable if the recipient becomes director of a similar company within 3 years; consequence not supplied. DEFAULT = ordinary 30% on the payout, levy not refunded"
+    source: "2026 anti-abuse rule: the payout can become taxable as movable income in the LATER year when the recipient becomes director of a same or similar business within three years, subject to rebuttal (2026 programme law arts. 13-18). Checklist review: 30% is a reasonable ordinary-rate scenario, but the model books it at liquidation and so misses the timing"
     hand_check: true
   liq.ordinary_rate:
     value: 0.30
-    status: supplied
-    source: "ordinary liquidation surplus above fiscal paid-up capital (via project owner)"
-    hand_check: true
+    status: owner_confirmed
+    source: "ordinary taxable liquidation surplus generally 30% (confirmed in owner checklist review)"
+    hand_check: false
+  vvprbis.wait_years_after_contribution_year:
+    value: 3
+    status: owner_confirmed
+    source: "the 18% VVPRbis rate starts with the profit distribution for the THIRD accounting year following the contribution year; earlier profits bear 30% (CIR 92 art. 269 par. 2, 2026 programme law; confirmed in owner checklist review). The 20% second-year step survives only for qualifying contributions through 31 December 2025. Eligibility also needs a company small at the time of contribution, new registered shares issued from 1 July 2013 for fully paid new cash contributions, continuous full ownership and no preferential economic rights"
+    hand_check: false
+    note: "profit of year t is VVPRbis-eligible if t >= contribution year + 3; the contribution year is the company's first taxable-period year"

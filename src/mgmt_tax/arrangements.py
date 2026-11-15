@@ -92,7 +92,7 @@ def simulate_employee(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Hou
         cost = Y[t]
         wage = wage_from_employer_cost(cost, pol)
         ee = employee_ssc(wage, pol)
-        prof = np.minimum(pol.v("emp.professional_expense_rate") * wage, pol.v("emp.professional_expense_cap"))
+        prof = np.minimum(pol.v("emp.professional_expense_rate") * (wage - ee), pol.v("emp.professional_expense_cap"))   # lump sum on wage after employee contributions
         pit = total_income_tax(wage - ee - prof, pol)
         net = wage - ee - pit
         er = cost - wage

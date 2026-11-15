@@ -49,7 +49,7 @@ primary source. Results from the earlier `belgium_abm` runs used an illustrative
 ```bash
 pip install -e /path/to/belgium_abm        # branch claude/statbel-data-integration-maq0e5 (only its crn module is used)
 pip install numpy pandas pyyaml pytest
-python3 -m pytest -q                        # 76 tests (worked examples, proposal mechanics, invariants)
+python3 -m pytest -q                        # 79 tests (worked examples, proposal mechanics, invariants)
 python3 scripts/run_comparison_a.py         # writes outputs/comparison_A/
 python3 scripts/make_report_a.py            # writes docs/comparison_A_results.md and docs/hand_check_list.md
 python3 scripts/run_comparison_b.py         # about 2 minutes on 4 cores; writes outputs/comparison_B/

@@ -17,12 +17,10 @@ CASES = {
     "baseline": {},
     "return_2pct": {"asm.real_return": 0.02},
     "return_3pct": {"asm.real_return": 0.03},
-    "lr_dividend_total_18pct": {"lr.dividend_withholding": 0.08889},        # 10% + 0.9 x 8.889% = 18% (owner's stated total)
-    "lock_plus_one_year": {"lr.lock_extra_calendar_years": 1},
-    "no_exempt_first_periods": {"corp.pay_test_first_exempt_periods": 0},   # alternative reading of 'test starts in the fifth period'
-    "se_14pct_above_ceiling": {"se.rate_above_ceiling_2": 0.1416},
-    "employee_deduction_3000": {"emp.professional_expense_rate": 1.0, "emp.professional_expense_cap": 3000.0},  # HYPOTHETICAL fixed deduction, not a rule
-    "no_pay_covers_profit_rule": {"corp.pay_test_covers_profit": False},
+    "lock_without_extra_year": {"lr.lock_extra_calendar_years": 0},                 # earlier reading of the lock (a date-based model could differ)
+    "vvprbis_no_wait": {"vvprbis.wait_years_after_contribution_year": 0},           # VVPRbis from the first year (affects new companies only)
+    "employee_no_lump_sum": {"emp.professional_expense_rate": 0.0, "emp.professional_expense_cap": 0.0},   # earlier default: no professional-expense lump sum
+    "no_lower_pay_exception": {"corp.pay_test_covers_profit": False},               # pay must reach EUR 51,000 to keep the 20% rate
     "anti_abuse_rate_0": {"lr.anti_abuse_rate": 0.0},
 }
 for label, ov in CASES.items():

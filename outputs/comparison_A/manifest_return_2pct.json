@@ -43,14 +43,14 @@
     "new": 1
   },
   "banner": "RULES SUPPLIED BY THE PROJECT OWNER, NOT INDEPENDENTLY CONFIRMED AGAINST PRIMARY SOURCES. Draft proposals are not law. | NON-STATUTORY ASSUMPTIONS (stylised); not data. | DRAFT PROPOSALS ARE NOT LAW; parameters below are scenario assumptions | PATH CHANGES: return_2pct from 2026",
-  "git_commit": "af36484",
-  "max_ledger_residual": 1.5133991837501526e-09,
-  "n_rules_used": 53,
+  "git_commit": "3ba8db0",
+  "max_ledger_residual": 1.3387762010097504e-09,
+  "n_rules_used": 54,
   "rule_status_counts": {
-    "supplied": 22,
+    "owner_confirmed": 30,
     "assumed": 15,
-    "open": 9,
     "scenario": 4,
-    "interpretation": 3
+    "open": 4,
+    "supplied": 1
   }
 }

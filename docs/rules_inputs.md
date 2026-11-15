@@ -101,35 +101,23 @@ Government's projected revenue: EUR 300m (2027); EUR 450m a year (2028, 2029); m
 - the distribution of director pay and retained profits in S0 (form 281.20 and NBB annual accounts give routes, no public distribution found);
 - the employee definition for P1.
 
-## H. How the engine uses these inputs (WP1, 15 November 2026)
+## H. How the engine uses these inputs (updated 15 November 2026 after the owner's checklist review)
 
-The machine-readable version is `configs/policy_be_2026_supplied.yaml` (rules) and `configs/assumptions.yaml` (assumptions); every value has an id, status and source, and `docs/hand_check_list.md` is generated from them. **No rule has status `checked`.**
+The machine-readable version is `configs/policy_be_2026_supplied.yaml` (rules) and `configs/assumptions.yaml` (assumptions); every value has an id, status and source, and `docs/hand_check_list.md` is generated from them. New status `owner_confirmed` = reported confirmed against primary sources in the project owner's checklist review of 15 November 2026; **this analysis has still not opened the primary pages itself**, so nothing has status `checked`.
 
-Defaults chosen for open inputs (agreed 15 November: "assumptions are ok"):
+**What the review confirmed:** the personal income tax brackets, allowance and EUR 2,887.50 reduction; employee 13.07% and employer 25% (ordinary private benchmark); self-employed 20.5% / 14.16% with the EUR 110,562.42 ceiling, **zero marginal rate above it** (maximum EUR 5,103.05 a quarter) and the EUR 890.42 quarterly minimum; corporate 25% / 20% on the first EUR 100,000; the EUR 51,000 threshold; the exemption of taxable periods 1-4 from the pay test; 30% ordinary dividends and liquidation surplus; 18% VVPRbis; the 10% levy and 9.8% withholding of the liquidation reserve; exemption of qualifying reserve payouts on actual liquidation; the company contribution (EUR 409.30 below a 2024 balance-sheet total of EUR 879,163.44, EUR 1,022.38 above); **the 13% dividend-to-paid-up-capital limit was repealed (2017 reform), so `corp.dividend_capital_condition = false` is correct**.
 
-| input | engine default | direction of bias if the default is wrong |
-|---|---|---|
-| employee professional-expense lump sum, work bonus, employer reductions | none (0) | understates the employee's net income, overstates the BV's edge over the employee |
-| self-employed contribution above the second ceiling | 0% | overstates income left to sole traders and BV owners above about EUR 131,000 gross |
-| self-employed contribution base | income net of the contribution itself (closed form), same for sole trader and director | affects both arrangements alike |
-| social-fund fees | 0 | small |
-| company annual contribution | EUR 409.30 (the lower of the two supplied amounts; the balance-sheet threshold was not supplied) | EUR 613 a year |
-| real return on retained funds | 0% (swept 0-3%) | at 0% the timing of extraction has no value |
-| tax on private returns | 30% placeholder, irrelevant at 0% return | - |
-| household spending needs | 24,000 + 12,000 partner + 6,000 per child; employed partner nets 30,000 | placeholders |
+**What the review corrected (earlier readings of mine, now changed in the engine):**
 
-Readings of ambiguous supplied wording (please confirm):
+| item | earlier reading | confirmed rule | effect |
+|---|---|---|---|
+| liquidation-reserve total | 18.82% (reserve = available x 0.9) | **18.00%**: credit available / 1.10, levy 10% of the credited amount, 9.8% withholding on it; 9.09% at liquidation | lower exit tax on the dividend route, 10% -> 9.09% on liquidation |
+| lower-pay corporate-tax test | pay >= min(51,000, profit BEFORE pay) | **pay >= 51,000 or pay >= taxable income AFTER deducting that pay**; cheapest qualifying pay = min(51,000, profit / 2) | many companies keep the 20% rate with pay below EUR 51,000; P1 now bites on them |
+| reserve lock | payable from year + 3 | **three full years from the end of the constitution year: payable from year + 4** (a 2026 reserve in 2030) | `lr.lock_extra_calendar_years = 1` |
+| VVPRbis | available from the first year to an eligible company | **18% only for profit of the third accounting year after the contribution year or later** (earlier profit 30%); eligibility depends on the shares and the contribution date | modelled with three reserve pools; mature companies unaffected, new companies delayed |
+| employee professional expenses | none (default) | **30% of wage after employee contributions, capped at EUR 6,070** (income 2026) | employee tax lower; the company's edge over the employee falls |
 
-1. **Liquidation reserve total on the dividend route.** The components (10% levy at creation, 9.8% withholding) imply 10% + 0.9 x 9.8% = **18.82%** if the withholding applies to the reserve net of the levy; the owner states "effective 18%". The engine uses the components; sensitivity case `lr_dividend_total_18pct` uses 18% exactly (effect on results is small).
-2. **Lock.** A reserve created in year v may be paid as a dividend from year v+3 (`lr.lock_extra_calendar_years` = 0). If the law counts from the end of the creation year plus three years, set it to 1 (sensitivity case `lock_plus_one_year`). The lock is not applied to payout on liquidation (supplied rule: no additional withholding on actual liquidation).
-3. **"Test starts in the fifth taxable period."** Read as: taxable periods 1-4 are exempt from the EUR 51,000 pay condition. Sensitivity case `no_exempt_first_periods`; results are reported separately for a mature company (period 5 or later in 2026) and a new one.
-4. **"Lower pay can qualify if it covers taxable profit."** Read as: the test is pay >= min(51,000, taxable profit before deducting the director's pay).
-5. **Anti-abuse rule.** The consequence was not supplied. Default: the payout is taxed as an ordinary 30% dividend and the levy is not refunded (`lr.anti_abuse_rate`). Reported as separate `*_antiabuse` strategy variants, not as a baseline.
-6. **Pension-relevant income** is reported (employee gross wage, net self-employed income, BV director pay net of contributions). No euro value is put on pensions.
-
-Not modelled and flagged: a possible dividend-vs-paid-up-capital condition on the 20% rate (the engine raises an error if switched on), VVPRbis eligibility conditions and any waiting period, benefits in kind, family tax rules, tax-advantaged private pension saving, indexation of thresholds, loss carry-forward.
-
-New items for section F (primary-source check): the two readings above, VVPRbis conditions, the dividend-vs-capital condition, the anti-abuse consequence.
+**Still open or approximate (see `hand_check_list.md`):** whether a given owner meets the VVPRbis conditions (assumed met); the timing and consequence of the anti-abuse rule (the model books 30% at liquidation; the rule taxes the payout as movable income in a later year); the 7.2% municipal surcharge (average not reproducible; rates vary); the 20% benefits-in-kind rule; the start-up exemption from the company contribution (EUR 409 a year); the work bonus and employer reductions; family tax rules; the self-employed contribution base (the model equates payments with the final liability of the same year, a steady-state approximation); the 30% tax on private returns (placeholder; irrelevant at 0% return); the household spending needs and partner income (placeholders).
 
 ## I. How the three proposals are encoded (WP2, comparison B)
 

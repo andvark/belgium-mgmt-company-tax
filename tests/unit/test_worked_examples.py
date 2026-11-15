@@ -79,12 +79,16 @@ def test_corporate_two_rates(pol):
 
 
 def test_pay_condition(pol):
-    # fifth period: pay >= min(51,000, profit before pay)
+    # fifth period: pay >= 51,000, or pay >= taxable income AFTER deducting the pay (= profit before pay - pay)
     assert qualifies_for_reduced_rate(A(51000), A(200000), 5, pol)[0]
-    assert not qualifies_for_reduced_rate(A(50999.99), A(200000), 5, pol)[0]
-    assert qualifies_for_reduced_rate(A(40000), A(40000), 5, pol)[0]       # profit 40,000 < 51,000: pay covering it qualifies
-    assert not qualifies_for_reduced_rate(A(39999), A(40000), 5, pol)[0]
-    assert qualifies_for_reduced_rate(A(0), A(200000), 4, pol)[0]          # first four periods exempt (interpretation)
+    assert not qualifies_for_reduced_rate(A(50999.99), A(200000), 5, pol)[0]   # taxable 149,000 after pay: pay does not cover it
+    # the checklist's example: 60,000 before pay and pay 30,000 leaves 30,000 taxable -> qualifies; 29,999 leaves 30,001 -> does not
+    assert qualifies_for_reduced_rate(A(30000), A(60000), 5, pol)[0]
+    assert not qualifies_for_reduced_rate(A(29999), A(60000), 5, pol)[0]
+    # 100,000 before pay: pay 50,000 leaves 50,000 -> qualifies (cheapest qualifying pay = profit / 2 below 102,000)
+    assert qualifies_for_reduced_rate(A(50000), A(100000), 5, pol)[0] and not qualifies_for_reduced_rate(A(49999), A(100000), 5, pol)[0]
+    assert qualifies_for_reduced_rate(A(39999), A(40000), 5, pol)[0]       # taxable 1 after pay: covered
+    assert qualifies_for_reduced_rate(A(0), A(200000), 4, pol)[0]          # first four periods exempt (confirmed)
 
 
 # ---------------------------------------------------------------- distributions (on 100,000 of post-tax profit)
@@ -92,11 +96,13 @@ def test_distribution_routes(pol):
     x = A(100000)
     assert 0.30 * 100000 == 30000                                          # ordinary dividend
     assert 0.18 * 100000 == 18000                                          # VVPRbis dividend
+    # liquidation reserve (confirmed): credit 100,000 / 1.10 = 90,909.09 ; levy 9,090.91 ; withholding 9.8% x 90,909.09 = 8,909.09 ; total 18,000 = 18.00%
     levy, pool = lr_allocate(x, pol)
-    assert levy[0] == pytest.approx(10000.0) and pool[0] == pytest.approx(90000.0)
-    assert lr_dividend_withholding(pool, pol)[0] == pytest.approx(8820.0)  # 9.8% x 90,000 ; total 18,820 = 18.82% (owner stated 18%)
-    assert lr_liquidation_tax(pool, False, pol)[0] == 0.0                  # liquidation: levy only, effective 10%
-    assert lr_liquidation_tax(pool, True, pol)[0] == pytest.approx(27000.0)  # anti-abuse default 30% x 90,000
+    assert levy[0] == pytest.approx(9090.9091, abs=1e-3) and pool[0] == pytest.approx(90909.0909, abs=1e-3)
+    assert lr_dividend_withholding(pool, pol)[0] == pytest.approx(8909.0909, abs=1e-3)
+    assert levy[0] + lr_dividend_withholding(pool, pol)[0] == pytest.approx(18000.0, abs=1e-6)
+    assert lr_liquidation_tax(pool, False, pol)[0] == 0.0                  # liquidation: levy only, 9.09%
+    assert lr_liquidation_tax(pool, True, pol)[0] == pytest.approx(27272.7273, abs=1e-3)  # anti-abuse default 30% x 90,909.09
     assert ordinary_liquidation_tax(x, pol)[0] == pytest.approx(30000.0)   # 30% on surplus above paid-up capital
 
 
@@ -104,15 +110,16 @@ def test_vintaged_lock(pol):
     acct = ReserveAccount((1,))
     acct.add(2026, A(100.0))
     acct.add(2027, A(50.0))
-    assert acct.distributable(2028, pol)[0] == 0.0       # 2 years: locked
-    assert acct.distributable(2029, pol)[0] == 100.0     # 2026 vintage reaches 3 years
-    assert acct.distributable(2030, pol)[0] == 150.0
-    assert acct.take_distributable(2029, pol)[0] == 100.0
+    # confirmed: three full years from the end of the constitution year; a 2026 reserve is first payable in 2030 (lock 3 + 1 calendar year)
+    assert acct.distributable(2029, pol)[0] == 0.0       # locked
+    assert acct.distributable(2030, pol)[0] == 100.0     # 2026 vintage
+    assert acct.distributable(2031, pol)[0] == 150.0
+    assert acct.take_distributable(2030, pol)[0] == 100.0
     assert acct.total()[0] == 50.0                       # younger vintage untouched
-    pol2 = pol.with_overrides({"lr.lock_extra_calendar_years": 1}, "lock+1")
+    pol2 = pol.with_overrides({"lr.lock_extra_calendar_years": 0}, "lock+0")   # earlier reading, kept as a sensitivity
     acct = ReserveAccount((1,))
     acct.add(2026, A(100.0))
-    assert acct.distributable(2029, pol2)[0] == 0.0 and acct.distributable(2030, pol2)[0] == 100.0
+    assert acct.distributable(2029, pol2)[0] == 100.0 and acct.distributable(2028, pol2)[0] == 0.0
 
 
 # ---------------------------------------------------------------- whole arrangements, one year, no shocks
@@ -120,12 +127,13 @@ SINGLE = Household("single", 1, 0, False)  # need 24,000
 
 
 def test_employee_one_year(path):
-    # W 48,000 ; employee 6,273.60 ; taxable 41,726.40 ; tax 4,180 + 5,116 + 0.45 x 12,216.40 (=5,497.38) = 14,793.38 ;
-    # -2,887.50 = 11,905.88 ; x 1.072 = 12,763.10336 ; net 48,000 - 6,273.60 - 12,763.10336 = 28,963.29664 ; saves 4,963.29664
+    # W 48,000 ; employee 6,273.60 ; lump sum min(30% x 41,726.40 = 12,517.92 ; cap 6,070) = 6,070 ; taxable 35,656.40 ;
+    # tax 4,180 + 5,116 + 0.45 x 6,146.40 (=2,765.88) = 12,061.88 ; -2,887.50 = 9,174.38 ; x 1.072 = 9,834.93536 ;
+    # net 48,000 - 6,273.60 - 9,834.93536 = 31,891.46464 ; saves 7,891.46464
     o = simulate_employee(np.array([[60000.0]]), [2026], path, SINGLE, (1,))
-    assert o.taxes["pit"].ravel()[0] == pytest.approx(12763.10336, abs=1e-4)
-    assert o.wealth_end.ravel()[0] == pytest.approx(4963.29664, abs=1e-4)
-    assert o.total_tax().ravel()[0] == pytest.approx(31036.70336, abs=1e-4)   # 12,000 + 6,273.60 + 12,763.10336
+    assert o.taxes["pit"].ravel()[0] == pytest.approx(9834.93536, abs=1e-4)
+    assert o.wealth_end.ravel()[0] == pytest.approx(7891.46464, abs=1e-4)
+    assert o.total_tax().ravel()[0] == pytest.approx(28108.53536, abs=1e-4)   # 12,000 + 6,273.60 + 9,834.93536
 
 
 def test_sole_trader_one_year(path):
@@ -159,11 +167,11 @@ def test_bv_retain_then_vvprbis_dividend(path):
 
 
 def test_bv_liquidation_reserve_then_liquidation(path):
-    # levy 10% x 80,000 = 8,000 ; reserve 72,000 ; liquidation: no extra tax ; wealth = 29,272.434 + 72,000 - 24,000 = 77,272.434
+    # credit 80,000 / 1.10 = 72,727.27 ; levy 7,272.73 ; liquidation: no extra tax ; wealth = 29,272.434 + 72,727.273 - 24,000 = 77,999.707
     o = _bv(path, BVStrategy("t", "threshold", "liquidation_reserve", "vvprbis", None, "liquidation"))
-    assert o.taxes["lr_levy"].ravel()[0] == pytest.approx(8000.0)
-    assert o.wealth_end.ravel()[0] == pytest.approx(77272.434, abs=1e-3)
-    assert o.total_tax().ravel()[0] == pytest.approx(50136.866, abs=1e-3)  # 20,000 + 409.30 + 8,676.349 + 13,051.217 + 8,000
+    assert o.taxes["lr_levy"].ravel()[0] == pytest.approx(7272.7273, abs=1e-3)
+    assert o.wealth_end.ravel()[0] == pytest.approx(77999.707, abs=1e-3)
+    assert o.total_tax().ravel()[0] == pytest.approx(49409.593, abs=1e-3)  # 20,000 + 409.30 + 8,676.349 + 13,051.217 + 7,272.727
 
 
 def test_bv_ordinary_liquidation(path):
@@ -193,3 +201,34 @@ def test_policy_path_by_calendar_year(pol):
     assert pol.rules["corp.reduced_rate"].value == 0.20  # baseline untouched
     t = path.used_table()
     assert "corp.reduced_rate" in set(t.rule_id)
+
+
+# ---------------------------------------------------------------- findings of the owner's checklist review (15 Nov 2026)
+def test_cheapest_qualifying_pay_is_half_of_profit_below_102k(path):
+    # client pays 104,409.30 ; admin 4,000 + company contribution 409.30 -> profit before pay 100,000.  'threshold' pays min(51,000, 100,000 / 2) = 50,000:
+    # taxable 50,000 <= pay -> qualifies for 20% (fifth period): corporate tax 10,000 ; post-tax profit 40,000
+    s = BVStrategy("t", "threshold", "free_reserve", "vvprbis", None, "dividend")
+    o = simulate_bv(np.array([[104409.30]]), [2026], path, SINGLE, s, (1,), first_period=5)
+    assert o.owner_pay.ravel()[0] == pytest.approx(50000.0)
+    assert o.taxes["corp_tax"].ravel()[0] == pytest.approx(10000.0)
+    assert o.reduced_rate_years.ravel()[0] == 1.0
+
+
+def test_vvprbis_starts_with_the_third_year_after_the_contribution_year(path):
+    # new company (first period 2026), client pays 155,409.30 each year -> post-tax profit 80,000 a year, all distributed each year (VVPRbis dividends).
+    # profit of 2026, 2027, 2028 bears 30% (3 x 24,000 = 72,000); profit of 2029 bears 18% (14,400): total 86,400.  A mature company pays 18% throughout.
+    s = BVStrategy("t", "threshold", "distribute", "vvprbis", None, "liquidation")
+    yv = np.array([[155409.30]] * 4)
+    new = simulate_bv(yv, [2026, 2027, 2028, 2029], path, SINGLE, s, (1,), first_period=1)
+    old = simulate_bv(yv, [2026, 2027, 2028, 2029], path, SINGLE, s, (1,), first_period=5)
+    assert new.taxes["dividend_wht"].ravel()[0] == pytest.approx(86400.0)
+    assert old.taxes["dividend_wht"].ravel()[0] == pytest.approx(4 * 14400.0)
+    assert new.ledger_residual < 1e-6
+
+
+def test_liquidation_reserve_is_available_before_vvprbis_starts(path):
+    # the reserve is not tied to VVPRbis eligibility: a new company's first-year profit (80,000) can be credited at once: levy 7,272.73
+    s = BVStrategy("t", "threshold", "liquidation_reserve", "vvprbis", None, "liquidation")
+    o = simulate_bv(np.array([[155409.30]]), [2026], path, SINGLE, s, (1,), first_period=1)
+    assert o.taxes["lr_levy"].ravel()[0] == pytest.approx(7272.7273, abs=1e-3)
+    assert o.taxes["liquidation_tax"].ravel()[0] == 0.0

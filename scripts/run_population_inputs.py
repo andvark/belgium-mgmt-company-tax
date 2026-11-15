@@ -21,6 +21,7 @@ POL = load_policy(ROOT / "configs" / "policy_be_2026_supplied.yaml", ROOT / "con
 STRATS = strategies_ext()
 SCEN = scenario_list()
 ARCH = ["thr_dist_ord", "thr_dist_vvpr", "thr_ret_vvpr_k5", "thr_lr_liq", "min_dist_vvpr", "min_lr_liq", "min_dist_ord"]
+ARCH += ["fx60_lr_liq", "fx80_lr_liq", "fx100_lr_liq"]   # not owner categories: needed to follow the baseline-best strategy of owners who plan optimally
 
 
 def job(args):

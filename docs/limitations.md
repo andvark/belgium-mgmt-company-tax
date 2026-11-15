@@ -37,7 +37,7 @@ Stated up front so that no result is read as more than it is.
 ## Added with comparison A (15 November 2026)
 
 24. **Perfect-foresight owners.** `BV_BEST` is the best of 19 fixed strategies by mean terminal wealth, evaluated with full knowledge of the rules. It is an upper bound on what a tax-minimising owner gets, not a description of owners.
-25. **Comparators are not optimised.** Sole traders and employees get no tax-advantaged private pension saving, third-pillar saving or other deductions, and the employee gets no professional-expense lump sum or work bonus (inputs not supplied). This overstates the BV advantage.
+25. **Comparators are not optimised.** Sole traders and employees get no tax-advantaged private pension saving, third-pillar saving or other deductions, and the employee gets no work bonus or employer reduction (the professional-expense lump sum is included since the owner's review). This overstates the BV advantage.
 26. **Household type acts only through liquidity.** Taxation is individual and family tax rules were not supplied; household results differ because the owner must finance more or less spending.
 27. **A real return of 0%** in the baseline means timing of extraction is worth nothing; the sensitivity cases with 2-3% show the effect.
 28. **Pension entitlements are not valued.** A large share of the BV's advantage is lower social contributions, which buy lower pension-relevant income.
@@ -61,6 +61,14 @@ Stated up front so that no result is read as more than it is.
 40. **The wealth bound is a steady-state comparison.** The national distribution is rebuilt from observed HFCS deciles and a Pareto tail (Gini 0.596 vs 0.604), owner households are placed at assumed percentiles, and the 15-year accumulated loss is subtracted; the sign of the Gini change depends on the placement.
 41. **Hire responses are ignored at population level** (the micro results show they are rarely chosen) and the taxes on a hire's wage are not counted.
 42. **Per-owner tax paths use fixed 2026 euros and a 15-year horizon with liquidation in 2040**; late-year (2040) figures are an artefact and are not used in the budget comparisons with the government's projections.
+
+## Added after the owner's checklist review (15 November 2026)
+
+43. **Rules are reported confirmed, not checked here.** Status `owner_confirmed` means the project owner's review reported them confirmed against primary sources; this analysis could not open those pages.
+44. **VVPRbis eligibility is assumed.** Whether a given owner's shares meet the conditions (new registered shares for fully paid new cash contributions, continuous full ownership, no preferential rights, small company at contribution) is an assumption; only the three-year wait after the contribution year is modelled. A continuation of an existing activity can inherit an earlier start date (not modelled).
+45. **Anti-abuse timing.** The model books a 30% tax on the liquidation-reserve payout at liquidation; the rule taxes it as movable income in the later year in which the recipient becomes a director of a similar business, subject to rebuttal.
+46. **Self-employed contribution base** is a steady-state approximation (the model equates the contributions paid in the year with the final liability of the same year).
+47. **Municipal surcharge** of 7.2% is a national average that could not be reproduced; rates vary by municipality.
 
 ## What the study can credibly claim
 

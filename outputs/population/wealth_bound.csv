@@ -1,28 +1,28 @@
 case,placement,gini_before,gini_after,top10_before,top10_after,owner_share_of_wealth,mean_loss,loss_share_of_total_wealth,n_owners,delta_gini
-"Combined mild, owners keep planning",above the median (50-95th percentile),0.595794,0.599283,0.414421,0.418656,0.091501,76056.327349,0.012437,13451,0.003490
-"Combined mild, owners keep planning",middle (30-80th percentile),0.595794,0.603139,0.414421,0.419201,0.050904,75950.042328,0.012419,13451,0.007345
-"Combined mild, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595552,0.414421,0.416416,0.142106,75943.089717,0.012418,13451,-0.000242
-"Combined mild, owners re-plan",above the median (50-95th percentile),0.595794,0.599254,0.414421,0.418635,0.091501,75656.225071,0.012371,13451,0.003460
-"Combined mild, owners re-plan",middle (30-80th percentile),0.595794,0.603112,0.414421,0.419187,0.050904,75552.405481,0.012354,13451,0.007318
-"Combined mild, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595538,0.414421,0.416399,0.142106,75542.893845,0.012353,13451,-0.000256
-"Combined central, owners keep planning",above the median (50-95th percentile),0.595794,0.599345,0.414421,0.418733,0.091501,77407.540680,0.012658,13451,0.003552
-"Combined central, owners keep planning",middle (30-80th percentile),0.595794,0.603269,0.414421,0.419287,0.050904,77307.091995,0.012641,13451,0.007475
-"Combined central, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595546,0.414421,0.416450,0.142106,77290.132405,0.012639,13451,-0.000248
-"Combined central, owners re-plan",above the median (50-95th percentile),0.595794,0.599313,0.414421,0.418709,0.091501,76972.143682,0.012587,13451,0.003519
-"Combined central, owners re-plan",middle (30-80th percentile),0.595794,0.603239,0.414421,0.419272,0.050904,76874.162873,0.012571,13451,0.007445
-"Combined central, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595531,0.414421,0.416431,0.142106,76853.782344,0.012567,13451,-0.000263
-"Combined harsh, owners keep planning",above the median (50-95th percentile),0.595794,0.599802,0.414421,0.419232,0.091501,86060.242311,0.014073,13451,0.004008
-"Combined harsh, owners keep planning",middle (30-80th percentile),0.595794,0.604096,0.414421,0.419798,0.050904,85958.453436,0.014056,13451,0.008302
-"Combined harsh, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595577,0.414421,0.416714,0.142106,85932.166289,0.014052,13451,-0.000216
-"Combined harsh, owners re-plan",above the median (50-95th percentile),0.595794,0.599744,0.414421,0.419190,0.091501,85296.093023,0.013948,13451,0.003950
-"Combined harsh, owners re-plan",middle (30-80th percentile),0.595794,0.604045,0.414421,0.419774,0.050904,85198.630271,0.013932,13451,0.008251
-"Combined harsh, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595548,0.414421,0.416679,0.142106,85162.848538,0.013926,13451,-0.000246
-NO management companies (leavers: 0% employees),above the median (50-95th percentile),0.595794,0.605109,0.414421,0.423782,0.091501,168889.509626,0.027617,13451,0.009316
-NO management companies (leavers: 0% employees),middle (30-80th percentile),0.595794,0.610605,0.414421,0.423316,0.050904,168720.020824,0.027589,13451,0.014812
-NO management companies (leavers: 0% employees),top-heavy (70-99th percentile),0.595794,0.597687,0.414421,0.419839,0.142106,168524.625267,0.027557,13451,0.001893
-NO management companies (leavers: 50% employees),above the median (50-95th percentile),0.595794,0.608407,0.414421,0.426597,0.091501,229057.114231,0.037456,13451,0.012613
-NO management companies (leavers: 50% employees),middle (30-80th percentile),0.595794,0.614130,0.414421,0.425332,0.050904,228871.660484,0.037425,13451,0.018336
-NO management companies (leavers: 50% employees),top-heavy (70-99th percentile),0.595794,0.599510,0.414421,0.421996,0.142106,228576.961710,0.037377,13451,0.003717
-NO management companies (leavers: 100% employees),above the median (50-95th percentile),0.595794,0.611383,0.414421,0.429059,0.091501,289224.718835,0.047294,13451,0.015590
-NO management companies (leavers: 100% employees),middle (30-80th percentile),0.595794,0.616941,0.414421,0.426929,0.050904,289023.300145,0.047261,13451,0.021147
-NO management companies (leavers: 100% employees),top-heavy (70-99th percentile),0.595794,0.601493,0.414421,0.424048,0.142106,288629.298152,0.047197,13451,0.005699
+"Combined mild, owners keep planning",above the median (50-95th percentile),0.595794,0.599813,0.414421,0.419384,0.091501,89411.921981,0.014621,13451,0.004019
+"Combined mild, owners keep planning",middle (30-80th percentile),0.595794,0.604405,0.414421,0.420074,0.050904,89314.034948,0.014605,13451,0.008611
+"Combined mild, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595463,0.414421,0.416745,0.142106,89320.047275,0.014606,13451,-0.000331
+"Combined mild, owners re-plan",above the median (50-95th percentile),0.595794,0.599767,0.414421,0.419346,0.091501,88719.234272,0.014507,13451,0.003974
+"Combined mild, owners re-plan",middle (30-80th percentile),0.595794,0.604347,0.414421,0.420043,0.050904,88623.807154,0.014492,13451,0.008553
+"Combined mild, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595449,0.414421,0.416719,0.142106,88625.863117,0.014492,13451,-0.000345
+"Combined central, owners keep planning",above the median (50-95th percentile),0.595794,0.599882,0.414421,0.419468,0.091501,90889.600303,0.014862,13451,0.004088
+"Combined central, owners keep planning",middle (30-80th percentile),0.595794,0.604549,0.414421,0.420169,0.050904,90797.312106,0.014847,13451,0.008756
+"Combined central, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595458,0.414421,0.416784,0.142106,90792.598509,0.014846,13451,-0.000336
+"Combined central, owners re-plan",above the median (50-95th percentile),0.595794,0.599833,0.414421,0.419427,0.091501,90142.548904,0.014740,13451,0.004040
+"Combined central, owners re-plan",middle (30-80th percentile),0.595794,0.604486,0.414421,0.420135,0.050904,90053.126894,0.014726,13451,0.008693
+"Combined central, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595443,0.414421,0.416755,0.142106,90043.210491,0.014724,13451,-0.000351
+"Combined harsh, owners keep planning",above the median (50-95th percentile),0.595794,0.600417,0.414421,0.420050,0.091501,100869.518228,0.016494,13451,0.004624
+"Combined harsh, owners keep planning",middle (30-80th percentile),0.595794,0.605521,0.414421,0.420760,0.050904,100773.911933,0.016479,13451,0.009727
+"Combined harsh, owners keep planning",top-heavy (70-99th percentile),0.595794,0.595498,0.414421,0.417092,0.142106,100769.287823,0.016478,13451,-0.000295
+"Combined harsh, owners re-plan",above the median (50-95th percentile),0.595794,0.600328,0.414421,0.419975,0.091501,99535.715769,0.016276,13451,0.004535
+"Combined harsh, owners re-plan",middle (30-80th percentile),0.595794,0.605411,0.414421,0.420702,0.050904,99447.123735,0.016262,13451,0.009617
+"Combined harsh, owners re-plan",top-heavy (70-99th percentile),0.595794,0.595467,0.414421,0.417040,0.142106,99426.280010,0.016258,13451,-0.000326
+NO management companies (leavers: 0% employees),above the median (50-95th percentile),0.595794,0.606012,0.414421,0.424818,0.091501,187478.895593,0.030657,13451,0.010218
+NO management companies (leavers: 0% employees),middle (30-80th percentile),0.595794,0.612297,0.414421,0.424413,0.050904,187328.690604,0.030632,13451,0.016504
+NO management companies (leavers: 0% employees),top-heavy (70-99th percentile),0.595794,0.597724,0.414421,0.420376,0.142106,187130.435669,0.030600,13451,0.001930
+NO management companies (leavers: 50% employees),above the median (50-95th percentile),0.595794,0.608169,0.414421,0.426447,0.091501,224890.808844,0.036774,13451,0.012375
+NO management companies (leavers: 50% employees),middle (30-80th percentile),0.595794,0.614075,0.414421,0.425306,0.050904,224724.475892,0.036747,13451,0.018281
+NO management companies (leavers: 50% employees),top-heavy (70-99th percentile),0.595794,0.599261,0.414421,0.421820,0.142106,224435.530953,0.036700,13451,0.003467
+NO management companies (leavers: 100% employees),above the median (50-95th percentile),0.595794,0.610031,0.414421,0.427816,0.091501,262302.722094,0.042892,13451,0.014237
+NO management companies (leavers: 100% employees),middle (30-80th percentile),0.595794,0.615407,0.414421,0.425969,0.050904,262120.261180,0.042862,13451,0.019613
+NO management companies (leavers: 100% employees),top-heavy (70-99th percentile),0.595794,0.600834,0.414421,0.423152,0.142106,261740.626237,0.042800,13451,0.005041

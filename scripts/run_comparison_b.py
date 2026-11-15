@@ -84,5 +84,5 @@ if __name__ == "__main__":
     (OUT / "manifest_B.json").write_text(json.dumps({"n_rep": N_REP, "seed": SEED, "cohort": "mature (5th taxable period in 2026)", "profits": list(PROFITS_B), "households": list(HH),
                                                      "n_strategies": len(STRATS), "git_commit": git_commit(), "max_ledger_residual": ledger, "n_scenarios": len(SCEN), "n_runs": n_runs(),
                                                      "n_simulations": n_runs() * len(HH), "rule_status_counts": ru.drop_duplicates("rule_id").status.value_counts().to_dict(),
-                                                     "banner": "RULES SUPPLIED, NOT CONFIRMED; PROPOSAL PARAMETERS ARE SCENARIO ASSUMPTIONS, NOT THE DRAFT"}, indent=2), encoding="utf-8")
+                                                     "banner": "RULES REPORTED CONFIRMED IN THE OWNER'S REVIEW; PROPOSAL PARAMETERS ARE SCENARIO ASSUMPTIONS, NOT THE DRAFT"}, indent=2), encoding="utf-8")
     print("finished", f"{time.time() - t0:.0f}s", "max ledger residual", ledger, flush=True)

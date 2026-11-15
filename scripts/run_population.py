@@ -102,6 +102,15 @@ for name in COMBS:
                                  "static_2028_29_EURm": pop.periods(st)["2028-29"] / 1e6, "static_cum_EURm": pop.periods(st)["cumulative 2027-2040"] / 1e6})
 dyn = pd.DataFrame(rows)
 dyn.to_csv(OUT / "dynamic_grid_central.csv", index=False, float_format="%.4f")
+# where the response cancels the static gain (dynamic = static) and where revenue reaches zero, by share of leavers who stop all activity (central mix, owners re-plan, half of leavers employees)
+_c = dyn[(dyn.scenario == "Combined central") & dyn.adapt & (dyn.eps_employee_share == 0.5)]
+R["phi_cross_static_by_s"], R["phi_zero_by_s"] = {}, {}
+for _sv in (0.02, 0.05, 0.10):
+    _r0 = float(_c[(_c.s_per_pp == _sv) & (_c.phi_stop == 0.0)].revenue_2028_29_EURm.iloc[0])
+    _r1 = float(_c[(_c.s_per_pp == _sv) & (_c.phi_stop == 1.0)].revenue_2028_29_EURm.iloc[0])
+    _st = float(_c[(_c.s_per_pp == _sv) & (_c.phi_stop == 0.0)].static_2028_29_EURm.iloc[0])
+    R["phi_cross_static_by_s"][str(_sv)] = (_r0 - _st) / (_r0 - _r1)
+    R["phi_zero_by_s"][str(_sv)] = _r0 / (_r0 - _r1)
 
 # break-even stopping share over random mixes, and the number of owners who must stop activity to cancel the static gain
 scn = SC["Combined central"]

@@ -117,9 +117,9 @@ def test_wealth_is_increasing_in_profit_level_for_every_arrangement(pol):
 
 
 def test_exit_cost_ordering_and_lock_mechanics(pol):
-    """Effective tax on retained post-tax profit: LR liquidation 10% < VVPRbis 18% < ordinary liquidation 30%.
-    The LR dividend route costs 18.82% only on vintages past the 3-year lock: with a lump in the last year (2040) the vintages
-    2026-2037 (12 of 15) are paid as dividends and 2038-2040 stay locked and are liquidated at no extra withholding."""
+    """Effective tax on retained post-tax profit: LR liquidation 9.09% < VVPRbis 18% = LR dividend 18.00% < ordinary liquidation 30%.
+    The LR dividend route costs 18% only on vintages past the lock (3 full years after the year of constitution, payable from year + 4): with a lump
+    in the last year (2040) the vintages 2026-2036 (11 of 15) are paid as dividends and 2037-2040 stay locked and are liquidated at no extra withholding."""
     ys = np.full((len(YEARS), 1, 1), 150000.0)
     hh = Household("single", 1, 0, False)
     out = {}
@@ -131,11 +131,11 @@ def test_exit_cost_ordering_and_lock_mechanics(pol):
     w = {k: o.wealth_end.item() for k, o in out.items()}
     assert w["lr_liq"] > w["lr_div"] and w["lr_liq"] > w["vvpr"] > w["ord"]
     # hand arithmetic: profit before pay 150,000 - 4,000 - 409.30 = 145,590.70 ; pay 51,000 ; taxable 94,590.70 ; corporate tax 20% = 18,918.14 ;
-    # post-tax 75,672.56 per year ; reserve credited 0.9 x 75,672.56 = 68,105.304 per vintage ; withholding 9.8% on 12 vintages
+    # post-tax 75,672.56 per year ; credited 75,672.56 / 1.10 = 68,793.24 per vintage ; levy 6,879.32 per vintage ; withholding 9.8% on 11 vintages
     a = 145590.70 - 51000.0
     post = a - 0.20 * a
-    assert out["lr_div"].taxes["dividend_wht"].item() == pytest.approx(0.098 * 12 * 0.9 * post, rel=1e-9)
-    assert out["lr_liq"].taxes["lr_levy"].item() == pytest.approx(0.10 * 15 * post, rel=1e-9)
+    assert out["lr_div"].taxes["dividend_wht"].item() == pytest.approx(0.098 * 11 * post / 1.1, rel=1e-9)
+    assert out["lr_liq"].taxes["lr_levy"].item() == pytest.approx(15 * post * (1 - 1 / 1.1), rel=1e-9)
     assert out["vvpr"].taxes["dividend_wht"].item() == pytest.approx(0.18 * 15 * post, rel=1e-9)
 
 

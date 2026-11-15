@@ -1,9 +1,9 @@
 """Dividend regimes, liquidation-reserve levy/withholding and liquidation routes.
 
-Liquidation reserve (interpretation, see rules ``lr.*``): of an amount x allocated from post-tax profit, the company pays a
-levy lr.levy_rate * x and the reserve account holds x - levy.  Paid out as a dividend after the lock the withholding
-(lr.dividend_withholding) applies to the amount distributed from the account: total = 10% + 0.9 * 9.8% = 18.82%.
-Paid out on actual liquidation: no additional withholding (total 10%), unless the anti-abuse flag applies.
+Liquidation reserve (rules ``lr.*``, confirmed in the owner's checklist review): the levy is 10% of the amount CREDITED to the reserve.  From an
+amount ``a`` available after ordinary corporate tax the company credits ``a / 1.10`` and pays the levy ``a - a / 1.10``.  Paid out as a qualifying dividend
+the 9.8% withholding applies to the credited amount: total (0.10 + 0.098) / 1.10 = 18.00% of ``a``.  Paid out on actual liquidation: exempt at payout,
+so the total is 0.10 / 1.10 = 9.09% of ``a``, unless the anti-abuse flag applies.
 """
 
 from __future__ import annotations
@@ -22,10 +22,10 @@ def dividend_rate(regime: str, pol: Policy) -> float:
 
 
 def lr_allocate(amount: np.ndarray, pol: Policy) -> tuple[np.ndarray, np.ndarray]:
-    """Allocate ``amount`` to the liquidation reserve; return (levy paid by the company, amount credited to the reserve account)."""
-    x = np.clip(np.asarray(amount, dtype=float), 0.0, None)
-    levy = pol.v("lr.levy_rate") * x
-    return levy, x - levy
+    """Use ``amount`` (available after corporate tax) for the liquidation reserve; return (levy paid by the company, amount credited to the reserve account)."""
+    a = np.clip(np.asarray(amount, dtype=float), 0.0, None)
+    credited = a / (1.0 + pol.v("lr.levy_rate"))
+    return a - credited, credited
 
 
 def lr_dividend_withholding(pool_amount: np.ndarray, pol: Policy) -> np.ndarray:

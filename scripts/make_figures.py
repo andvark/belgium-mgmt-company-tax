@@ -35,8 +35,8 @@ SURF, INK, INK2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#8a8985", "#e6e
 BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GRAY = "#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#c9c8c2"
 SEQ = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95"]   # sequential blue 100 -> 600
 
-FOOT = ("Model results under tax rules supplied by the project owner and NOT independently confirmed; the proposals are scenario assumptions built from second-hand "
-        "descriptions, not the draft text. Single owner, EUR 2026, 15 years (2026-2040), 300 simulated paths. Not a forecast.")
+FOOT = ("Model results under the project owner's tax rules (reported confirmed in the owner's own review, not checked here); proposals are scenario assumptions from "
+        "second-hand descriptions, not the draft. Single owner, EUR 2026, 2026-2040, 300 simulated paths. Not a forecast.")
 SRC = "Source: belgium-mgmt-company-tax model (open code and data in the repository)"
 
 data_rows = []   # figure, series, x, y  -> docs/figures/figure_data.csv
@@ -52,8 +52,7 @@ def canvas(title, subtitle, wrap=64, h=6.75):
     fig.text(0.05, 0.955, t, fontsize=23, fontweight="bold", color=INK, va="top", linespacing=1.15)
     nl = t.count("\n") + 1
     fig.text(0.05, 0.955 - 0.075 * nl - 0.01, "\n".join(textwrap.wrap(subtitle, 110)), fontsize=11.5, color=INK2, va="top", linespacing=1.3)
-    fig.text(0.05, 0.062, "\n".join(textwrap.wrap(FOOT, 150)), fontsize=7.6, color=MUTED, va="top", linespacing=1.35)
-    fig.text(0.95, 0.012, SRC, fontsize=7.6, color=MUTED, ha="right", va="bottom")
+    fig.text(0.05, 0.072, "\n".join(textwrap.wrap(FOOT + "  " + SRC + ".", 160)), fontsize=7.6, color=MUTED, va="top", linespacing=1.35)
     return fig, nl
 
 
@@ -161,7 +160,7 @@ plt.close(fig)
 # 3. where each EUR 100 goes (stacked horizontal bars)
 # =============================================================================================================================
 rev = 100000 * N
-rows = [("Employee", "EMPLOYEE"), ("Sole trader", "SOLE_TRADER"), ("One-person company:\npay EUR 51k + dividends", "BV:thr_dist_vvpr"), ("One-person company:\nminimum pay + liquidation reserve", "BV:min_lr_liq")]
+rows = [("Employee", "EMPLOYEE"), ("Sole trader", "SOLE_TRADER"), ("One-person company:\nqualifying pay + dividends", "BV:thr_dist_vvpr"), ("One-person company:\nqualifying pay + liquidation reserve", "BV:thr_lr_liq")]
 parts = ["Left to the owner", "Social contributions", "Personal income tax", "Corporate tax and annual fee", "Dividend, reserve and liquidation taxes", "Running costs"]
 cols = [BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GRAY]
 M = {}
@@ -177,7 +176,7 @@ for lab, key in rows:
         record("03_where_100_euro_goes", f"{lab.replace(chr(10), ' ')} | {pn}", "EUR per 100 billed", round(100 * v / rev, 2))
 kept_emp, kept_bv = M[rows[0][0]][0] / rev, M[rows[3][0]][0] / rev
 fig, nl = canvas(f"Out of EUR 100 billed to a client, the owner keeps about {100 * kept_emp:.0f} as an employee and {100 * kept_bv:.0f} with the best-planned company",
-                 "Where EUR 100 of revenue goes over 15 years, at EUR 100,000 a year, single owner, current law. The employee bar is the employer's total cost (employee allowances not modelled). Lower contributions also mean lower pension-relevant income.", wrap=66)
+                 "Where EUR 100 of revenue goes over 15 years, at EUR 100,000 a year, single owner, current law. The employee bar is the employer's total cost (with the statutory professional-expense lump sum; work bonus not modelled). Lower contributions also mean lower pension-relevant income.", wrap=66)
 ax = fig.add_axes([0.25, 0.31, 0.70, 0.33])
 style(ax, grid="x")
 ax.spines["bottom"].set_visible(False)
@@ -203,12 +202,12 @@ plt.close(fig)
 # =============================================================================================================================
 # 4. advantage by strategy / exit route (ranked bars)
 # =============================================================================================================================
-names = [("min_lr_liq", "Minimum pay, profit in the liquidation reserve, liquidate (10% in total)"), ("thr_lr_liq", "Pay EUR 51k, liquidation reserve, liquidate (10%)"),
-         ("min_dist_vvpr", "Minimum pay, dividends every year at 18% (VVPRbis)"), ("thr_dist_vvpr", "Pay EUR 51k, dividends every year at 18% (VVPRbis)"),
-         ("thr_dist_ord", "Pay EUR 51k, ordinary dividends at 30%"), ("min_lr_liq_antiabuse", "Reserve route, but the anti-abuse rule applies (payout taxed 30%)"),
+names = [("thr_lr_liq", "Qualifying pay, profit in the liquidation reserve, liquidate (9.1% in total)"), ("min_lr_liq", "Minimum pay, liquidation reserve, liquidate (9.1%)"),
+         ("thr_dist_vvpr", "Qualifying pay, dividends every year at 18% (VVPRbis)"), ("min_dist_vvpr", "Minimum pay, dividends every year at 18% (VVPRbis)"),
+         ("thr_dist_ord", "Qualifying pay, ordinary dividends at 30%"), ("thr_lr_liq_antiabuse", "Reserve route, but the anti-abuse rule applies (payout taxed 30%)"),
          ("shell_full_pay", "Company that pays out all profit as salary")]
 vals = [(lab, a1.loc[f"BV:{n}", "adv_vs_sole_wealth_mean"] / N) for n, lab in names]
-fig, nl = canvas("The advantage is mostly the gap between a 10-18% exit rate and a 45-50% marginal rate on pay",
+fig, nl = canvas("The advantage is mostly the gap between a 9-18% exit rate and a 45-50% marginal rate on pay",
                  "Yearly advantage over a sole trader at EUR 100,000 revenue, by how the owner pays out profit. Holding profit back and taking it later adds nothing at 0% return: the rate matters, not the timing.", wrap=66)
 ax = fig.add_axes([0.40, 0.17, 0.52, 0.52])
 style(ax, grid="x")
@@ -220,7 +219,7 @@ for yy, (lab, v) in zip(y, vals, strict=True):
     record("04_advantage_by_exit_route", lab, "EUR per year vs sole trader", round(v, 1))
 ax.set_yticks(y)
 ax.set_yticklabels(["\n".join(textwrap.wrap(v[0], 46)) for v in vals], fontsize=9.6, color=INK, linespacing=1.15)
-ax.set_xlim(-2000, 17500)
+ax.set_xlim(-2000, 19500)
 ax.set_xticks([0, 5000, 10000, 15000])
 ax.set_xticklabels(["0", "5k", "10k", "EUR 15k"])
 ax.axvline(0, color=INK2, lw=1)
@@ -231,8 +230,8 @@ plt.close(fig)
 # 5. who is hit by which measure (heatmap with values)
 # =============================================================================================================================
 heads = [("P1_2027", "P1\nrate needs\nan employee"), ("P2x2_2028", "P2 at 2x\npayroll cap"), ("P2x3_2028", "P2 at 3x\npayroll cap"), ("P3_90pct_3y", "P3\nclient test\n(one client)"), (COMB, "All three\n(one client)")]
-arch = [("BV:min_lr_liq", "Minimum pay, reserve, liquidate"), ("BV:thr_lr_liq", "Pay EUR 51k, reserve, liquidate"), ("BV:min_dist_vvpr", "Minimum pay, annual dividends"),
-        ("BV:thr_dist_vvpr", "Pay EUR 51k, annual dividends"), ("BV:thr_ret_vvpr_k5", "Pay EUR 51k, retain, lump sum after 5 years"), ("BV:thr_dist_ord", "Pay EUR 51k, ordinary dividends only")]
+arch = [("BV:thr_lr_liq", "Qualifying pay, reserve, liquidate"), ("BV:min_lr_liq", "Minimum pay, reserve, liquidate"), ("BV:thr_dist_vvpr", "Qualifying pay, annual dividends"),
+        ("BV:min_dist_vvpr", "Minimum pay, annual dividends"), ("BV:thr_ret_vvpr_k5", "Qualifying pay, retain, lump sum after 5 years"), ("BV:thr_dist_ord", "Qualifying pay, ordinary dividends only")]
 base = allstrat[(allstrat.scenario == "baseline") & (allstrat.hire_cost == 0) & (allstrat.profit_level == 100000)].set_index("arrangement").wealth_end_mean
 Mx = np.zeros((len(arch), len(heads)))
 for i, (key, lab) in enumerate(arch):
@@ -300,9 +299,9 @@ plt.close(fig)
 # =============================================================================================================================
 pp = paths[(paths.profit_level == 100000) & (paths.concentration == 1.0) & (paths.hire_cost == 0)]
 yrs = list(range(2027, 2040))
-tl = [("ARCH:thr_dist_vvpr", "Pay EUR 51k, dividends every year", BLUE), ("ARCH:thr_lr_liq", "Pay EUR 51k, liquidation reserve", ORANGE), ("ARCH:min_lr_liq", "Minimum pay, liquidation reserve", AQUA)]
+tl = [("ARCH:thr_dist_vvpr", "Qualifying pay, dividends every year", BLUE), ("ARCH:thr_lr_liq", "Qualifying pay, liquidation reserve", ORANGE), ("ARCH:min_lr_liq", "Minimum pay, liquidation reserve", AQUA)]
 fig, nl = canvas("Same reform, opposite sign for the budget in the first years, depending on how owners pay out profit",
-                 "Extra tax per owner and year (all three measures, one client, EUR 100,000 revenue, owner keeps the same planning). Owners who use the liquidation reserve stop paying its 10% levy; the 30% comes only when the company is wound up.", wrap=66)
+                 "Extra tax per owner and year (all three measures, one client, EUR 100,000 revenue, owner keeps the same planning). Owners who use the liquidation reserve stop paying its levy (10% of the credited amount); the 30% comes only when the company is wound up.", wrap=66)
 ax = fig.add_axes([0.08, 0.20, 0.71, 0.36])
 style(ax)
 ends = {}
@@ -335,7 +334,7 @@ plt.close(fig)
 # population-level figures (comparison C): every input about the owner mix is an ASSUMPTION that is swept
 # =============================================================================================================================
 POP = ROOT / "outputs" / "population"
-FOOT_POP = ("Model results: tax rules supplied by the project owner and NOT independently confirmed; proposals are scenario assumptions; the owner mix, the size of S0 (351,000 supplied, "
+FOOT_POP = ("Model results under the project owner's tax rules (reported confirmed in the owner's own review, not checked here); proposals are scenario assumptions; the owner mix, the size of S0 (351,000 supplied, "
             "share unverified) and the response of owners are assumptions that are swept, not data. Not a forecast.")
 
 
@@ -353,6 +352,8 @@ mc = pd.read_csv(POP / "static_revenue_mc.csv")
 dyn = pd.read_csv(POP / "dynamic_grid_central.csv")
 strict = pd.read_csv(POP / "strict_bound.csv")
 tor = pd.read_csv(POP / "tornado.csv")
+import json as _json  # noqa: E402
+psum = _json.load(open(POP / "population_summary.json"))
 
 # ---- 08: budget range across owner mixes ---------------------------------------------------------------------------------------
 sel = [("P1 alone, 2027", "P1 (2027)", "2027", 300), ("All three, 2028-29", "Combined central", "2028-29", 450), ("All three, 2030-39", "Combined central", "2030-39", None)]
@@ -383,14 +384,14 @@ ax.set_xticklabels(["-500", "0", "500", "1,000", "EUR 1,500m"])
 r1 = mc[(mc.scenario == "P1 (2027)") & (mc.period == "2027") & (~mc.adapt)].iloc[0]
 r2 = mc[(mc.scenario == "Combined central") & (mc.period == "2028-29") & (~mc.adapt)].iloc[0]
 fig.text(0.05, 0.18, "\n".join(textwrap.wrap(f"Share of mixes reaching the projection: {r1.share_ge_300:.0%} for P1 alone in 2027 (EUR 300m); {r2.share_ge_450:.0%} for all three in 2028-29 (EUR 450m). "
-         f"{r2.share_negative:.0%} of mixes give negative revenue in 2028-29, because owners who keep profit in the liquidation reserve stop paying its 10% levy.", 140)), fontsize=10.5, color=INK2, va="top", linespacing=1.3)
+         f"{r2.share_negative:.0%} of mixes give negative revenue in 2028-29, because owners who keep profit in the liquidation reserve stop paying its levy (10% of the credited amount).", 140)), fontsize=10.5, color=INK2, va="top", linespacing=1.3)
 fig.savefig(FIG / "08_budget_range_across_mixes.png", dpi=200, facecolor=SURF)
 plt.close(fig)
 
 # ---- 09: break-even ------------------------------------------------------------------------------------------------------------------
 cc = dyn[(dyn.scenario == "Combined central") & dyn.adapt & (dyn.eps_employee_share == 0.5)]
 fig, nl = canvas_pop("Leavers who become sole traders or employees add revenue; it takes over a third of leavers stopping work to cancel that",
-                     "Extra revenue 2028-29 at an illustrative central owner mix, by the share of leavers who stop all activity. s = fall in the number of company owners per percentage point of revenue advantage lost. All lines cross the no-response line at about 37%; revenue reaches zero at 46-74%.", wrap=66)
+                     f"Extra revenue 2028-29 at an illustrative central owner mix, by the share of leavers who stop all activity. s = fall in the number of company owners per percentage point of revenue advantage lost. All lines cross the no-response line at about {np.mean(list(psum['phi_cross_static_by_s'].values())):.0%}; revenue reaches zero at {min(psum['phi_zero_by_s'].values()):.0%}-{max(psum['phi_zero_by_s'].values()):.0%}.", wrap=66)
 ax = fig.add_axes([0.07, 0.19, 0.74, 0.38])
 style(ax)
 for sv, c, lab in ((0.0, GRAY, "no response (s = 0)"), (0.02, BLUE, "s = 2% per point"), (0.05, ORANGE, "s = 5% per point"), (0.10, AQUA, "s = 10% per point")):

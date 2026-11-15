@@ -62,10 +62,10 @@ def test_p2_caps_reduced_dividends(pol, m, wht):
 
 
 def test_p2_caps_liquidation_reserve_allocation(pol):
-    # m = 2: only 25,500 can be allocated (levy 2,550); 54,500 stays in the free reserve and is liquidated at 30% = 16,350
+    # m = 2: only 25,500 can be used for the reserve (levy 25,500 - 25,500 / 1.10 = 2,318.18); 54,500 stays in the free reserve and is liquidated at 30% = 16,350
     p2 = (PathChange(2026, {"p2.payroll_multiple": 2}, "P2x2"),)
     o = run(pol, THR_LR, p2)
-    assert T(o, "lr_levy") == pytest.approx(2550.0)
+    assert T(o, "lr_levy") == pytest.approx(2318.1818, abs=1e-3)
     assert T(o, "liquidation_tax") == pytest.approx(16350.0)
 
 
@@ -123,9 +123,9 @@ def test_p3_only_new_amounts_are_affected(pol):
     one = np.ones((3 + 2, 1))
     o = run(pol, THR_RET, p3, years=(2026, 2027), share=one, burn=3)
     assert T(o, "dividend_wht") == pytest.approx(38400.0)
-    # liquidation reserve: 2026 allocation 80,000 (levy 8,000) ; 2027 amount stays ordinary -> liquidated at 30% = 24,000
+    # liquidation reserve: 2026 allocation 80,000 (levy 80,000 - 80,000 / 1.10 = 7,272.73) ; 2027 amount stays ordinary -> liquidated at 30% = 24,000
     o2 = run(pol, THR_LR, p3, years=(2026, 2027), share=one, burn=3)
-    assert T(o2, "lr_levy") == pytest.approx(8000.0)
+    assert T(o2, "lr_levy") == pytest.approx(7272.7273, abs=1e-3)
     assert T(o2, "liquidation_tax") == pytest.approx(24000.0)
     assert o2.ledger_residual < 1e-6
 

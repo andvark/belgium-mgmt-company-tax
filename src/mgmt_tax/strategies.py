@@ -1,7 +1,8 @@
 """One-person BV: owner strategies with a vintaged reserve account, a liquidity constraint and an exit route.
 
 A strategy = (pay rule, what happens to post-tax profit, dividend regime, optional interim lump-sum year, final exit).
-  pay_rule   'threshold' pay min(51,000, profit before pay)  - keeps the reduced corporate rate after the exempt periods
+  pay_rule   'threshold' the CHEAPEST pay that keeps the reduced corporate rate after the exempt periods: min(51,000, profit before pay / 2)
+             (below 51,000 pay must cover the taxable income after deducting that pay)
              'liquidity' the smallest pay whose net-of-contributions-and-tax covers the household need (the 'minimum salary')
              'fixed'     a fixed amount per year (pay_amount), capped at profit before pay
              'full'      all profit paid as director remuneration (the BV as a shell)
@@ -19,7 +20,9 @@ Draft proposals (all OFF unless the policy path switches them on; see configs/pr
   P2  reduced-regime dividends and liquidation-reserve allocations are capped each year at payroll / m, the rest is taxed as ordinary;
   P3  when the owner's client share stays >= threshold throughout the lookback, the year's post-tax profit goes to an ORDINARY
       reserve (taxed 30% as dividend or liquidation) and cannot enter the liquidation reserve; earlier amounts keep their regime.
-The free reserve is therefore two pools: ``F_red`` (amounts that keep the reduced regimes) and ``F_ord`` (amounts that do not).
+The free reserve is three pools of post-tax profit: ``F_red`` (eligible for the 18% VVPRbis dividend AND for the liquidation reserve), ``F_lr`` (eligible for the
+liquidation reserve only: profit of the first years after the contribution, before VVPRbis starts - it starts with the profit of the THIRD accounting year following
+the contribution year) and ``F_ord`` (neither: profit of a year in which the P3 test binds).  Dividends out of F_lr and F_ord bear 30%.
 """
 
 from __future__ import annotations
@@ -73,25 +76,27 @@ def _pos(x):
     return np.clip(x, 0.0, None)
 
 
-def _distribute(g, f_red, f_ord, cap, r_red, r_ord):
-    """Pay a gross dividend g (capped at the positive pools), reduced-regime pool first.  The part of the reduced pool within ``cap`` bears r_red,
-    everything else r_ord.  Returns (gross paid, withholding, f_red', f_ord', cap')."""
-    pr, po = _pos(f_red), _pos(f_ord)
-    g = np.minimum(g, pr + po)
+def _distribute(g, f_red, f_ord, f_lr, cap, r_red, r_ord):
+    """Pay a gross dividend g (capped at the positive pools): F_red first (the part within ``cap`` bears r_red), then F_ord, then F_lr (the pool that can still
+    enter the liquidation reserve is kept longest); everything beyond the reduced part bears r_ord.  Returns (gross paid, withholding, F_red', F_ord', F_lr', cap')."""
+    pr, po, pl = _pos(f_red), _pos(f_ord), _pos(f_lr)
+    g = np.minimum(g, pr + po + pl)
     from_red = np.minimum(g, pr)
-    from_ord = g - from_red
+    rest = g - from_red
+    from_ord = np.minimum(rest, po)
+    from_lr = rest - from_ord
     red_part = np.minimum(from_red, cap)
     wht = r_red * red_part + r_ord * (g - red_part)
-    return g, wht, f_red - from_red, f_ord - from_ord, cap - red_part
+    return g, wht, f_red - from_red, f_ord - from_ord, f_lr - from_lr, cap - red_part
 
 
-def _gross_for_net(d, f_red, f_ord, cap, r_red, r_ord):
+def _gross_for_net(d, f_red, f_ord, f_lr, cap, r_red, r_ord):
     """Gross dividend needed to deliver a net amount d, reduced pool (within the cap) first."""
-    pr, po = _pos(f_red), _pos(f_ord)
+    pr, po, pl = _pos(f_red), _pos(f_ord), _pos(f_lr)
     ga = np.minimum(pr, cap)
     na = (1.0 - r_red) * ga
     g = np.where(d <= na, d / (1.0 - r_red), ga + (d - na) / (1.0 - r_ord))
-    return np.minimum(g, pr + po)
+    return np.minimum(g, pr + po + pl)
 
 
 def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household, strat: BVStrategy, shape: tuple[int, ...], first_period: int = 1,
@@ -103,7 +108,9 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
     K = pol0.v("asm.bv_paid_up_capital")
     F_red = np.zeros(shape)
     F_ord = np.zeros(shape)
+    F_lr = np.zeros(shape)
     lr = ReserveAccount(shape)
+    contribution_year = years[0] - (first_period - 1)   # first taxable period of the company = year of the contribution of its shares
     wp = np.full(shape, -K)
     T = len(years)
     for t, yr in enumerate(years):
@@ -112,7 +119,9 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
         regime = strat.div_regime if pol.v("asm.vvprbis_eligible") else "ordinary"
         r_red = dividend_rate(regime, pol)
         r_ord = dividend_rate("ordinary", pol)
-        eq_open = K + F_red + F_ord + lr.total()
+        # VVPRbis 18% applies to the profit of year t only from the third accounting year after the contribution year (profit of earlier years bears 30%)
+        vvpr_year_ok = True if regime == "ordinary" else bool(yr >= contribution_year + pol.v("vvprbis.wait_years_after_contribution_year"))
+        eq_open = K + F_red + F_ord + F_lr + lr.total()
         r = pol.v("asm.real_return")
         i_co = r * eq_open
         admin = pol.v("asm.admin_cost_bv") + (hire_cost if has_emp else 0.0)  # a hire at annual employer cost c is treated as a cost leaving the system
@@ -121,8 +130,8 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
         pp = Y[t] + i_co - admin - cc  # taxable profit before the director's pay
         pp_pos = np.clip(pp, 0.0, None)
         need = hh.owner_need(pol)
-        if strat.pay_rule == "threshold":
-            pay = np.minimum(pol.v("corp.director_min_pay"), pp_pos)
+        if strat.pay_rule == "threshold":   # the cheapest pay that keeps the reduced rate
+            pay = np.minimum(pol.v("corp.director_min_pay"), pp_pos / 2.0 if pol.v("corp.pay_test_covers_profit") else pp_pos)
         elif strat.pay_rule == "full":
             pay = pp_pos
         elif strat.pay_rule == "fixed":
@@ -154,9 +163,12 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
             red_ok = ~(window.min(axis=0) >= thr - 1e-12)
         else:
             red_ok = np.ones(shape[-1], dtype=bool)
-        to_red = np.where(red_ok | (a < 0), a, 0.0)
+        both = red_ok & vvpr_year_ok
+        to_red = np.where(both | (a < 0), a, 0.0)
+        to_lr = np.where(red_ok & ~both & (a >= 0), a, 0.0)
         F_red = F_red + to_red
-        F_ord = F_ord + (a - to_red)
+        F_lr = F_lr + to_lr
+        F_ord = F_ord + (a - to_red - to_lr)
 
         wht = np.zeros(shape)
         liqtax = np.zeros(shape)
@@ -165,30 +177,33 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
 
         # 1) liquidity gap financed by a dividend from the free pools
         deficit = np.clip(need - net_pay, 0.0, None)
-        g = _gross_for_net(deficit, F_red, F_ord, cap, r_red, r_ord)
-        g, w, F_red, F_ord, cap = _distribute(g, F_red, F_ord, cap, r_red, r_ord)
+        g = _gross_for_net(deficit, F_red, F_ord, F_lr, cap, r_red, r_ord)
+        g, w, F_red, F_ord, F_lr, cap = _distribute(g, F_red, F_ord, F_lr, cap, r_red, r_ord)
         wht += w
         net_div += g - w
         out.liquidity_gap += np.clip(deficit - (g - w), 0.0, None)
 
         # 2) what happens to the rest of the free pools
         if strat.vehicle == "distribute":
-            g, w, F_red, F_ord, cap = _distribute(_pos(F_red) + _pos(F_ord), F_red, F_ord, cap, r_red, r_ord)
+            g, w, F_red, F_ord, F_lr, cap = _distribute(_pos(F_red) + _pos(F_ord) + _pos(F_lr), F_red, F_ord, F_lr, cap, r_red, r_ord)
             wht += w
             net_div += g - w
         elif strat.vehicle == "liquidation_reserve":
-            x = np.minimum(_pos(F_red), cap)  # only amounts that keep the reduced regimes, within the yearly capacity
-            lv, credited = lr_allocate(x, pol)
+            x_lr = np.minimum(_pos(F_lr), cap)   # profit that cannot use VVPRbis yet goes into the reserve first; the yearly capacity (P2) is consumed
+            cap = cap - x_lr
+            x_red = np.minimum(_pos(F_red), cap)
+            cap = cap - x_red
+            lv, credited = lr_allocate(x_lr + x_red, pol)
             levy += lv
             lr.add(yr, credited)
-            F_red = F_red - x
-            cap = cap - x
+            F_lr = F_lr - x_lr
+            F_red = F_red - x_red
         elif strat.vehicle != "free_reserve":
             raise ValueError(strat.vehicle)
 
         # 3) interim lump sum
         if strat.lump_year is not None and (t + 1) == strat.lump_year:
-            g, w, F_red, F_ord, cap = _distribute(_pos(F_red) + _pos(F_ord), F_red, F_ord, cap, r_red, r_ord)
+            g, w, F_red, F_ord, F_lr, cap = _distribute(_pos(F_red) + _pos(F_ord) + _pos(F_lr), F_red, F_ord, F_lr, cap, r_red, r_ord)
             wht += w
             net_div += g - w
             pool = lr.take_up_to(yr, pol, cap)
@@ -200,9 +215,9 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
         # 4) final exit (liquidation of the company at the end of the horizon)
         cap_return = np.zeros(shape)
         if t == T - 1:
-            out.equity_pre_exit = K + F_red + F_ord + lr.total()
+            out.equity_pre_exit = K + F_red + F_ord + F_lr + lr.total()
             if strat.exit == "dividend":
-                g, w, F_red, F_ord, cap = _distribute(_pos(F_red) + _pos(F_ord), F_red, F_ord, cap, r_red, r_ord)
+                g, w, F_red, F_ord, F_lr, cap = _distribute(_pos(F_red) + _pos(F_ord) + _pos(F_lr), F_red, F_ord, F_lr, cap, r_red, r_ord)
                 wht += w
                 net_div += g - w
                 pool = lr.take_up_to(yr, pol, cap)
@@ -210,27 +225,29 @@ def simulate_bv(Y: np.ndarray, years: list[int], path: PolicyPath, hh: Household
                 wht += w
                 net_div += pool - w
             elif strat.exit == "liquidation":
-                gp = _pos(F_red) + _pos(F_ord)
+                gp = _pos(F_red) + _pos(F_ord) + _pos(F_lr)
                 lt = ordinary_liquidation_tax(gp, pol)
                 liqtax += lt
                 net_div += gp - lt
                 F_red = F_red - _pos(F_red)
                 F_ord = F_ord - _pos(F_ord)
+                F_lr = F_lr - _pos(F_lr)
             else:
                 raise ValueError(strat.exit)
             rest = lr.take_all()
             lt2 = lr_liquidation_tax(rest, strat.anti_abuse, pol)
             liqtax += lt2
             net_div += rest - lt2
-            net_div += F_red + F_ord  # negative balances (losses) are absorbed by the owner
+            net_div += F_red + F_ord + F_lr  # negative balances (losses) are absorbed by the owner
             F_red = np.zeros(shape)
             F_ord = np.zeros(shape)
+            F_lr = np.zeros(shape)
             cap_return = np.full(shape, K)
             K_close = 0.0
         else:
             K_close = K
 
-        eq_close = K_close + F_red + F_ord + lr.total()
+        eq_close = K_close + F_red + F_ord + F_lr + lr.total()
         gi, mov = private_interest(wp, pol)
         cash_in = net_pay + net_div + cap_return
         wp_new = wp + gi - mov + cash_in - need
